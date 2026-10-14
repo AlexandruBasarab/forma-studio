@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = __dirname;
 let html = fs.readFileSync(path.join(root, 'src/template.html'), 'utf8');
-for (const [marker, file] of [['STYLES','src/styles.css'],['DIMENSION_STYLES','src/dimensions.css'],['PHOTO_STYLES','src/photo.css'],['SHARING_STYLES','src/sharing.css'],['THREE','vendor/three.min.js'],['CABINETS','src/cabinets.js'],['ISLANDS','src/islands.js'],['PHOTO_ANALYSIS','src/photo-analysis.js'],['PHOTO_MODEL','src/photo-model.js'],['PHOTO_UI','src/photo-ui.js'],['APP','src/app.js']]) {
+for (const [marker, file] of [['THEME_INIT','src/theme.js'],['STYLES','src/styles.css'],['DIMENSION_STYLES','src/dimensions.css'],['PHOTO_STYLES','src/photo.css'],['SHARING_STYLES','src/sharing.css'],['THEME_STYLES','src/theme.css'],['THREE','vendor/three.min.js'],['CABINETS','src/cabinets.js'],['ISLANDS','src/islands.js'],['PHOTO_ANALYSIS','src/photo-analysis.js'],['PHOTO_MODEL','src/photo-model.js'],['PHOTO_UI','src/photo-ui.js'],['APP','src/app.js']]) {
   const content = fs.readFileSync(path.join(root,file),'utf8').replace(/<\/script/gi,'<\\/script');
   html = html.replace('/* '+marker+' */', () => content);
 }

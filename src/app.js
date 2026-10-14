@@ -278,8 +278,9 @@
   function labelSprite(text) {
     const canvas = document.createElement('canvas'); canvas.width = 320; canvas.height = 80;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'rgba(249,250,244,0.94)'; ctx.beginPath(); ctx.roundRect(2, 2, 316, 76, 16); ctx.fill();
-    ctx.fillStyle = '#526449'; ctx.font = '500 33px Segoe UI, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 160, 41);
+    const dark = window.FormaTheme.getTheme() === 'dark';
+    ctx.fillStyle = dark ? 'rgba(29,40,32,0.96)' : 'rgba(249,250,244,0.94)'; ctx.beginPath(); ctx.roundRect(2, 2, 316, 76, 16); ctx.fill();
+    ctx.fillStyle = dark ? '#d7e4cd' : '#526449'; ctx.font = '500 33px Segoe UI, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 160, 41);
     const map = new T.CanvasTexture(canvas); map.colorSpace = T.SRGBColorSpace;
     const sprite = new T.Sprite(new T.SpriteMaterial({ map, depthTest: false, transparent: true }));
     sprite.scale.set(45, 11.25, 1); sprite.renderOrder = 20;
@@ -289,7 +290,7 @@
     dispose(dimensions); dimensions = new T.Group();
     const h = metrics.height;
     const {minX,maxX,minZ,maxZ}=modelBounds,centerX=(minX+maxX)/2,centerZ=(minZ+maxZ)/2;
-    const mat = new T.LineBasicMaterial({ color: 0x86947b, depthTest: false, transparent: true, opacity: 0.8 });
+    const mat = new T.LineBasicMaterial({ color: window.FormaTheme.getTheme()==='dark'?0xb0c69c:0x86947b, depthTest: false, transparent: true, opacity: 0.8 });
     function line(points) { const obj = new T.Line(new T.BufferGeometry().setFromPoints(points.map(p => new T.Vector3(...p))), mat); obj.renderOrder = 10; dimensions.add(obj); }
     const z = maxZ + 11, bottom = 4;
     line([[minX,bottom,z],[maxX,bottom,z]]);
@@ -303,6 +304,19 @@
     for (const dz of [minZ,maxZ]) line([[maxX+6,4,dz],[maxX+12,4,dz]]);
     const depthLabel = labelSprite(fmt(metrics.depth) + ' cm'); depthLabel.position.set(maxX+20,4,centerZ); dimensions.add(depthLabel);
     dimensions.visible = state.dimensions; scene.add(dimensions);
+  }
+  function syncTheme() {
+    const dark = window.FormaTheme.getTheme() === 'dark';
+    const action = dark ? 'Activează modul luminos' : 'Activează modul întunecat';
+    $('themeToggle').setAttribute('aria-pressed', String(dark));
+    $('themeToggle').setAttribute('aria-label', action);
+    $('themeToggle').title = action;
+    floor.material.color.set(dark ? '#000000' : '#5c6350');
+    floor.material.opacity = dark ? 0.32 : 0.18;
+    grid.material.color.set(dark ? '#e5f0df' : '#ffffff');
+    grid.material.opacity = dark ? 0.1 : 0.065;
+    if(model)makeDimensions();
+    dirty = true;
   }
   function updateCamera() {
     camera.position.set(target.x + radius*Math.sin(phi)*Math.sin(theta), target.y+radius*Math.cos(phi), target.z+radius*Math.sin(phi)*Math.cos(theta));
@@ -586,9 +600,10 @@
     renderer.setPixelRatio(1);renderer.setSize(exportWidth,exportHeight,false);
     renderer.render(scene,camera);
     const source=renderer.domElement, canvas=document.createElement('canvas');canvas.width=source.width;canvas.height=source.height+140;
-    const ctx=canvas.getContext('2d');ctx.fillStyle='#f4f4ee';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,0,0);
-    ctx.fillStyle='#3f5137';ctx.font='30px Georgia';ctx.fillText('FORMĂ / '+MODELS[state.model].title,32,source.height+47);
-    ctx.font='17px Segoe UI';ctx.fillStyle='#7d8973';ctx.fillText(fmt(metrics.width)+' × '+fmt(metrics.depth)+' × '+fmt(metrics.height)+' cm  ·  '+(state.palette?PRESETS[state.palette].name:'Paletă personalizată'),32,source.height+81);
+    const dark=window.FormaTheme.getTheme()==='dark';
+    const ctx=canvas.getContext('2d');ctx.fillStyle=dark?'#151d18':'#f4f4ee';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,0,0);
+    ctx.fillStyle=dark?'#e4eadf':'#3f5137';ctx.font='30px Georgia';ctx.fillText('FORMĂ / '+MODELS[state.model].title,32,source.height+47);
+    ctx.font='17px Segoe UI';ctx.fillStyle=dark?'#a0ad9a':'#7d8973';ctx.fillText(fmt(metrics.width)+' × '+fmt(metrics.depth)+' × '+fmt(metrics.height)+' cm  ·  '+(state.palette?PRESETS[state.palette].name:'Paletă personalizată'),32,source.height+81);
     ctx.font='12px Segoe UI';ctx.fillText('Model orientativ după fotografii. Blat '+state.top+' · Fronturi '+state.fronts+' · Corp '+state.body,32,source.height+110);
     renderer.setPixelRatio(previousRatio);renderer.setSize(previousSize.x,previousSize.y,false);dirty=true;
     canvas.toBlob(blob=>{if(blob){download(blob,'forma-'+state.model+'.png');toast('Imaginea 3D a fost exportată.');}},'image/png');
@@ -606,6 +621,9 @@
     catch(error){state=previous;throw error;}
   }});
   renderer.domElement.addEventListener('webglcontextlost', event=>{event.preventDefault();toast('Contextul grafic s-a întrerupt. Reîncarcă pagina pentru a restaura modelul.');});
+  $('themeToggle').addEventListener('click',()=>window.FormaTheme.toggle());
+  window.addEventListener('forma:themechange',syncTheme);
+  syncTheme();
   new ResizeObserver(resize).observe(viewport);
   rebuild(true); resize(); $('loading').hidden=true;
   if(shareLoadMessage)toast(shareLoadMessage);

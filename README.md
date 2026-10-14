@@ -10,6 +10,7 @@ Configurator 3D de mobilier pentru explorarea culorilor, finisajelor și dimensi
 - Dimensiuni editabile pentru corpuri și compartimentare.
 - Lățime, adâncime și poziție independente pentru fiecare blat, inclusiv depășiri față de corp.
 - Rotire 3D, zoom, vederi prestabilite, cote și deschiderea ușilor.
+- Mod luminos / întunecat, cu preferința memorată în browser și detectarea temei sistemului la prima deschidere.
 - Salvare automată în browser, export/import de proiecte JSON și export de imagini PNG.
 - Partajarea configurației prin link: model, dimensiuni, blaturi, culori, finisaje și funcții.
 
@@ -31,6 +32,8 @@ npm start
 Comanda de build generează `configurator-mobilier.html` și `dist/index.html`. Serverul local afișează în terminal adresa la care poate fi deschis configuratorul. Build-ul și serverul folosesc numai module Node.js incluse.
 
 Editează fișierele din `src/`, apoi rulează din nou build-ul. Nu edita direct HTML-ul generat.
+
+Comutatorul soare/lună din antet schimbă tema interfeței. Această preferință este separată de proiect și de linkurile partajate; culorile mobilierului rămân cele alese în configurator. Fundalul exportului PNG urmează tema curentă.
 
 ## Publicare
 
