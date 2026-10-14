@@ -47,7 +47,7 @@ Controalele **Fronturi / Uși — Sus** și **Fronturi / Uși — Jos** coloreaz
 
 ### Cloudflare Workers cu generare AI
 
-Configurația `wrangler.jsonc` publică un Worker separat, **forma-studio-ai**, cu fișierele din `dist` și endpointurile `/api/ai/*`. Funcția AI este inclusă în `main`; selectează acest branch în integrarea Git Cloudflare:
+Configurația `wrangler.jsonc` publică Worker-ul de producție **forma-studio**, cu fișierele din `dist` și endpointurile `/api/ai/*`. Numele aplicației din Cloudflare trebuie să fie același cu `name` din configurație. Funcția AI este inclusă în `main`; selectează acest branch drept **Production branch** în integrarea Git Cloudflare:
 
 - Build command: `npm run build`
 - Deploy command: `npx wrangler deploy`
@@ -56,7 +56,7 @@ Configurația `wrangler.jsonc` publică un Worker separat, **forma-studio-ai**, 
 
 Poți adăuga secretul și din terminal cu `npx wrangler secret put AI_SESSION_SECRET`; valoarea se introduce interactiv. Nu adăuga cheile personale ale furnizorilor în setările publice de build. Generarea rămâne indisponibilă până când secretul de sesiune este configurat. Deploy-ul necesită autentificare Cloudflare și o versiune Node acceptată de Wrangler; folosește Node.js 22 sau mai nou pentru deploy.
 
-Configurația păstrează numele separat și nu modifică automat Worker-ul de producție `forma-studio`. Pentru un preview din dashboard, configurează secretul și în mediul respectiv. Git push publică sursele; deploy-ul este un pas distinct.
+Pentru publicarea din terminal, Wrangler reconstruiește automat fișierele cu `node build.cjs`. În dashboard, setează explicit **Build command** la `npm run build`: [Workers Builds nu preia configurația Custom Builds din Wrangler](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/). Cu integrarea Git activă, push-urile pe `main` trebuie să ruleze `npx wrangler deploy` pentru a activa noua versiune în producție; `npx wrangler versions upload` salvează doar o versiune pentru preview. Dacă build-ul reușește, dar site-ul rămâne vechi, verifică branch-ul de producție, comanda de deploy și versiunea activă în **Deployments**. Pentru un preview din dashboard, configurează secretul și în mediul respectiv.
 
 ### Găzduire statică
 

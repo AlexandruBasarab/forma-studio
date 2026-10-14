@@ -1,8 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "forma-studio-ai",
+  "name": "forma-studio",
   "main": "server/worker.mjs",
   "compatibility_date": "2026-10-14",
+  "build": { "command": "node build.cjs" },
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
