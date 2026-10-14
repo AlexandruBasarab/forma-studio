@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f3ee">
+<title>FORMĂ — Configurator de mobilier</title>
+<style>/* STYLES */</style>
+<style>/* DIMENSION_STYLES */</style>
+<style>/* PHOTO_STYLES */</style>
+<style>/* SHARING_STYLES */</style>
+</head>
+<body>
+<header class="app-header">
+  <a class="brand" href="#" aria-label="FORMĂ, configurator de mobilier"><svg width="28" height="32" viewBox="0 0 28 32" fill="none"><path d="M3 29V3h23M3 15h19M12 3v26" stroke="currentColor" stroke-width="2"/></svg><span>FORMĂ<small>ATELIER DE MOBILIER</small></span></a>
+  <div class="header-middle"><span class="live-dot"></span> Spațiul tău. Culorile tale.</div>
+  <div class="header-actions"><button class="button quiet" id="importBtn" title="Deschide un proiect JSON salvat">Deschide proiect</button><button class="button dark" id="saveBtn"><svg viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/></svg><span>Salvează proiect</span></button></div>
+</header>
+<main class="workspace">
+<aside class="sidebar" aria-label="Configurarea mobilierului">
+  <div class="sidebar-intro"><div class="eyebrow">DE LA IDEE LA FORMĂ</div><h1>Compune-ți mobilierul.</h1><p>Alege un model. Găsește combinația ta.</p></div>
+  <section class="control-section"><div class="section-heading"><h2><span>01</span> Modelul</h2><small>2 variante</small></div>
+  <div class="model-grid">
+    <button class="model-card active" data-model="custom" aria-pressed="true"><div class="model-illustration"><svg viewBox="0 0 130 82"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M26 74V7h67v67ZM26 48h67M26 59h67M59 48v26M31 7v31h57V7M31 24h57M53 7v31M74 7v31M35 38v10M93 15h10m-10 8h10m-10 8h10m-10 8h10m-10 9h10m-10 8h10m-10 9h10"/><path d="M30 47h64" stroke-width="4"/></g></svg></div><strong>Dulap vitrină</strong><small>200 × 50 × 215 cm</small><span class="selected-dot"></span></button>
+    <button class="model-card" data-model="bar" aria-pressed="false"><div class="model-illustration"><svg viewBox="0 0 130 82"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M68 25h42v47H68ZM68 36h42M89 36v36M17 39h51M19 42v30h17V42M19 55h17m-17 10h17"/><path d="M66 23h46M15 39h54" stroke-width="4"/><path d="m74 29 7 0m17 0h7"/></g></svg></div><strong>Bar & masă</strong><small>110–190 × 110 × 110 cm</small><span class="selected-dot"></span></button>
+  </div></section>
+  <section class="control-section" id="dimensionSettings"><div class="section-heading"><h2><span>02</span> Dimensiuni</h2><button class="text-link" id="resetDimensions" title="Revino la dimensiunile din schiță">↺ Originale</button></div>
+    <div class="size-grid" id="sizeBasicFields"></div>
+    <details id="size-details" class="size-details"><summary id="sizeDetailsLabel">Blat și compartimentare</summary><div class="size-grid" id="sizeDetailFields"></div></details>
+    <p id="size-note" class="size-note"></p>
+  </section>
+  <section class="control-section" id="worktopSettings"><div class="section-heading"><h2><span>03</span> Blaturi</h2><button class="text-link" id="resetWorktop" title="Restabilește dimensiunea și poziția blatului selectat">↺ Original</button></div>
+    <label class="worktop-choice" for="worktopSelect">Blatul pe care îl modifici<select id="worktopSelect"><option value="cabinet">Blatul dulapului</option></select></label>
+    <div class="worktop-grid">
+      <label class="size-field" for="worktop-width"><span>Lățime blat</span><span class="dimension-input"><input id="worktop-width" data-worktop="width" type="number" inputmode="decimal" step="0.1" min="20" max="450" value="200" aria-describedby="worktop-note"><span>cm</span></span></label>
+      <label class="size-field" for="worktop-depth"><span>Adâncime blat</span><span class="dimension-input"><input id="worktop-depth" data-worktop="depth" type="number" inputmode="decimal" step="0.1" min="10" max="220" value="50" aria-describedby="worktop-note"><span>cm</span></span></label>
+    </div>
+    <div class="worktop-position-heading"><span>Poziția blatului</span><button class="text-link" id="centerWorktop">Centrează</button></div>
+    <div class="worktop-grid">
+      <label class="size-field" for="worktop-offsetX"><span>Stânga / dreapta</span><span class="dimension-input"><input id="worktop-offsetX" data-worktop="offsetX" type="number" inputmode="decimal" step="0.5" min="-100" max="100" value="0" aria-describedby="worktop-x-hint"><span>cm</span></span><small id="worktop-x-hint">− stânga · + dreapta</small></label>
+      <label class="size-field" for="worktop-offsetZ"><span>Spate / față</span><span class="dimension-input"><input id="worktop-offsetZ" data-worktop="offsetZ" type="number" inputmode="decimal" step="0.5" min="-100" max="100" value="0" aria-describedby="worktop-z-hint"><span>cm</span></span><small id="worktop-z-hint">− spate · + față</small></label>
+    </div>
+    <div class="worktop-overhang"><span id="overhang-label">Depășire față de corp</span><div><span>Stânga<strong id="overhang-left">0 cm</strong></span><span>Dreapta<strong id="overhang-right">0 cm</strong></span><span>Față<strong id="overhang-front">0 cm</strong></span><span>Spate<strong id="overhang-back">0 cm</strong></span></div><small>O valoare negativă indică retragerea blatului.</small></div>
+    <p id="worktop-note" class="size-note"></p>
+  </section>
+  <section class="control-section"><div class="section-heading"><h2><span>04</span> Palete Presetate</h2><button class="text-link" id="trendsBtn">Tendințe 2026 ↗</button></div>
+  <div class="palette-list">
+    <button class="palette" data-palette="oak" aria-pressed="false"><span class="palette-colors"><i style="background:#eeeae1"></i><i style="background:#b98c60" class="wood-chip"></i><i style="background:#b98c60" class="wood-chip"></i></span><span><strong>Stejar & alb cald</strong><small>Natural și luminos</small></span><span class="palette-check">✓</span></button>
+    <button class="palette" data-palette="cashmere" aria-pressed="false"><span class="palette-colors"><i style="background:#866247" class="wood-chip"></i><i style="background:#e7dfd2"></i><i style="background:#ded6c9"></i></span><span><strong>Cașmir & nuc</strong><small>Tonuri neutre, căldură discretă</small></span><span class="palette-check">✓</span></button>
+    <button class="palette active" data-palette="sage" aria-pressed="true"><span class="palette-colors"><i style="background:#c5a277" class="wood-chip"></i><i style="background:#87927b"></i><i style="background:#eff0e7"></i></span><span><strong>Salvie & stejar</strong><small>O notă de natură</small></span><span class="palette-check">✓</span></button>
+  </div></section>
+  <section class="control-section"><div class="section-heading"><h2><span>05</span> Culori & finisaje</h2><small id="paletteStatus">Salvie & stejar</small></div>
+  <div class="material-row"><label class="color-swatch" for="topColor"><input type="color" id="topColor" value="#c5a277" aria-label="Culoare Blat / Countertop"></label><div class="material-name"><label for="topColor">Blat / Countertop</label><input class="hex-input" id="topHex" value="#C5A277" maxlength="7" aria-label="Cod HEX blat" spellcheck="false"></div><select id="topFinish" aria-label="Finisaj blat"><option value="wood">Lemn</option><option value="matte">Mat</option><option value="stone">Piatră</option></select></div>
+  <div class="material-row"><label class="color-swatch" for="frontsColor"><input type="color" id="frontsColor" value="#87927b" aria-label="Culoare Fronturi / Uși"></label><div class="material-name"><label for="frontsColor">Fronturi / Uși</label><input class="hex-input" id="frontsHex" value="#87927B" maxlength="7" aria-label="Cod HEX fronturi" spellcheck="false"></div><select id="frontsFinish" aria-label="Finisaj fronturi"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
+  <div class="material-row"><label class="color-swatch" for="bodyColor"><input type="color" id="bodyColor" value="#eff0e7" aria-label="Culoare Carcasă și Corp"></label><div class="material-name"><label for="bodyColor">Carcasă & Corp</label><input class="hex-input" id="bodyHex" value="#EFF0E7" maxlength="7" aria-label="Cod HEX carcasă" spellcheck="false"></div><select id="bodyFinish" aria-label="Finisaj carcasă"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
+  <button id="shareAppearanceBtn" class="appearance-share-button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 15 6-6m-7 4-2 2a3 3 0 0 0 4 4l3-3m-2-8 3-3a3 3 0 0 1 4 4l-2 2"/></svg>Partajează culorile și finisajele</button>
+  <p class="appearance-share-hint">Păstrează combinația într-un link sau trimite-o mai departe.</p>
+  </section>
+  <section class="control-section last-section"><div class="section-heading"><h2><span>06</span> Detalii & funcții</h2></div>
+    <div id="extensionControl" class="extension-control" hidden><div class="range-label"><label for="extension">Extensia mesei</label><output id="extensionValue" for="extension">110 cm</output></div><input id="extension" type="range" min="0" max="100" value="100"><div class="range-ends"><span>Retrasă</span><span>Extinsă</span></div></div>
+    <label class="toggle-row" for="doorsOpen"><span>Deschide ușile<small>Explorează spațiul de depozitare</small></span><input type="checkbox" id="doorsOpen" role="switch"><span class="switch"></span></label>
+    <label class="toggle-row" for="glass" id="glassControl"><span>Fronturi din sticlă<small>Culoarea se aplică ramelor</small></span><input type="checkbox" id="glass" checked role="switch"><span class="switch"></span></label>
+    <button id="resetBtn" class="reset-button">↺ &nbsp; Resetează configurația</button>
+  </section>
+  <div class="sidebar-footer"><span class="live-dot"></span> Modificările se păstrează în acest browser.</div>
+</aside>
+<section class="stage" id="stage" aria-label="Vizualizare tridimensională">
+  <div class="stage-top"><div><div class="eyebrow" id="modelCategory">COLECȚIA BUCĂTĂRIE / 01</div><h2 id="modelTitle">Dulap vitrină</h2><p id="modelDescription">Depozitare generoasă. Detalii la vedere.</p></div><div class="stage-actions"><button class="icon-button" id="dimensionsBtn" aria-label="Afișează dimensiunile" aria-pressed="false" title="Dimensiuni"><svg viewBox="0 0 24 24"><path d="m3 16 13-13 5 5L8 21ZM7 12l3 3m1-7 3 3m1-7 3 3"/></svg></button><button class="icon-button" id="pngBtn" aria-label="Descarcă imagine PNG" title="Descarcă imagine PNG"><svg viewBox="0 0 24 24"><path d="M8 5 9 3h6l1 2h5v15H3V5Z"/><circle cx="12" cy="12" r="4"/></svg></button><button class="icon-button" id="fullscreenBtn" aria-label="Ecran complet" title="Ecran complet"><svg viewBox="0 0 24 24"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></svg></button></div></div>
+  <div class="viewport" id="viewport" role="img" tabindex="0" aria-label="Model 3D interactiv. Trage pentru rotire, folosește rotița pentru zoom. Tastele săgeți rotesc modelul, plus și minus fac zoom."></div>
+  <div class="loading" id="loading"><span></span>Pregătim atelierul…</div>
+  <div class="model-badge"><span class="live-dot"></span><span>MODEL 3D INTERACTIV</span></div>
+  <div class="dimension-card"><span>DIMENSIUNI GENERALE</span><strong id="sizeText">200 × 50 × 215 <small>cm</small></strong><small>Cu blaturi · lățime × adâncime × înălțime</small></div>
+  <div class="view-controls"><div class="view-tabs" role="group" aria-label="Unghi de vizualizare"><button data-view="perspective" class="active" aria-pressed="true">Perspectivă</button><button data-view="front" aria-pressed="false">Față</button><button data-view="back" aria-pressed="false">Spate</button><button data-view="side" aria-pressed="false">Lateral</button></div><div class="zoom-controls"><button id="zoomOut" aria-label="Micșorează">−</button><button id="fitBtn" aria-label="Încadrează modelul" title="Încadrează modelul"><svg viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 8h8v8H8Z"/></svg></button><button id="zoomIn" aria-label="Mărește">+</button></div></div>
+  <div class="stage-bottom"><span>↔ Trage pentru rotire <b>·</b> Derulează pentru zoom</span><span>Interpretare 3D după fotografii · dimensiuni orientative</span></div>
+</section>
+</main>
+<input type="file" id="projectFile" accept="application/json,.json" hidden>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="shareAppearanceDialog" class="appearance-share-dialog" aria-labelledby="appearanceShareTitle" aria-describedby="appearanceShareDescription">
+  <button id="closeAppearanceShare" class="dialog-close icon-button" aria-label="Închide partajarea">×</button>
+  <div class="eyebrow">COMBINAȚIA TA, ÎNTR-UN LINK</div>
+  <h2 id="appearanceShareTitle">Culori de dat mai departe.</h2>
+  <p id="appearanceShareDescription">La deschiderea linkului, culorile și finisajele se aplică automat. Modelul și dimensiunile rămân cele din proiectul destinatarului.</p>
+  <div class="appearance-share-preview">
+    <div><i id="share-top-chip" aria-hidden="true"></i><span><strong>Blat / Countertop</strong><small id="share-top-value"></small></span></div>
+    <div><i id="share-fronts-chip" aria-hidden="true"></i><span><strong>Fronturi / Uși</strong><small id="share-fronts-value"></small></span></div>
+    <div><i id="share-body-chip" aria-hidden="true"></i><span><strong>Carcasă & Corp</strong><small id="share-body-value"></small></span></div>
+  </div>
+  <label class="appearance-share-label" for="appearanceShareUrl">Linkul combinației</label>
+  <input id="appearanceShareUrl" class="appearance-share-url" type="text" readonly spellcheck="false" aria-describedby="appearanceShareStatus appearanceLocalNote">
+  <p id="appearanceLocalNote" class="appearance-local-note" hidden>Acesta este un link către fișierul de pe calculatorul tău. Pentru a-l trimite altor persoane, publică pagina pe un site și generează linkul de acolo.</p>
+  <button id="copyAppearanceLink" class="button dark appearance-copy-button" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H4v13h4"/></svg>Copiază linkul</button>
+  <p id="appearanceShareStatus" class="appearance-share-status" role="status" aria-live="polite"></p>
+</dialog>
+<dialog id="trendsDialog" aria-labelledby="trendsTitle"><button class="dialog-close icon-button" aria-label="Închide">×</button><div class="eyebrow">PALETE PRESETATE · 2026</div><h2 id="trendsTitle">Culori care aduc<br>natura mai aproape.</h2><p>Cele trei combinații pornesc de la direcțiile populare în rapoartele de design din 2026: lemn natural, alb și neutre calde, verde.</p><p>Studiul Houzz din SUA arată lemnul pe primul loc la culoarea dulapurilor (29%), urmat de alb (28%). Raportul NKBA evidențiază neutrele, verdele și finisajele din lemn.</p><p class="muted">Paletele sunt interpretări ale acestor tendințe, nu un clasament statistic al combinațiilor și nici un top specific României.</p><a href="https://www.houzz.com/magazine/10-kitchen-remodeling-trends-to-know-for-2026-stsetivw-vs~184210587" target="_blank" rel="noopener noreferrer">Houzz · Kitchen Trends 2026 ↗</a><a href="https://nkba.org/press/nkba-kbis-releases-annual-2026-kitchen-trends-report/" target="_blank" rel="noopener noreferrer">NKBA · Kitchen Trends Report 2026 ↗</a></dialog>
+<script>/* THREE */</script>
+<script>/* CABINETS */</script>
+<script>/* ISLANDS */</script>
+<script>/* PHOTO_ANALYSIS */</script>
+<script>/* PHOTO_MODEL */</script>
+<script>/* PHOTO_UI */</script>
+<script>/* APP */</script>
+</body></html>

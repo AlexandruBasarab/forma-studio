@@ -1,0 +1,18 @@
+.appearance-share-button{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:20px;padding:11px 9px;border:1px solid #cbd5c2;border-radius:7px;background:#f1f4eb;color:#435437;font-size:10px;font-weight:600;line-height:1.4}
+.appearance-share-button:hover{background:#e5ecd9;border-color:#97a88a}
+.appearance-share-button svg{width:17px;height:17px;flex-shrink:0}
+.appearance-share-hint{margin:8px 0 0;font-size:9px;line-height:1.6;color:var(--muted)}
+.appearance-share-dialog{width:480px;max-width:calc(100vw - 30px);max-height:calc(100dvh - 30px);overflow:auto}
+.appearance-share-dialog h2{margin:14px 0}
+.appearance-share-dialog>p{font-size:12px}
+.appearance-share-preview{display:grid;gap:11px;padding:17px 0;margin-bottom:10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.appearance-share-preview>div{display:flex;gap:11px;align-items:center}
+.appearance-share-preview i{display:block;width:33px;height:33px;flex-shrink:0;border:1px solid #0002;border-radius:6px}
+.appearance-share-preview strong{display:block;font-size:11px;font-weight:600}
+.appearance-share-preview small{display:block;font:10px/1.5 Consolas,monospace;color:#7b8572;margin-top:3px}
+.appearance-share-label{display:block;font-size:11px;margin:17px 0 8px;color:#596c4e}
+.appearance-share-url{display:block;width:100%;min-width:0;padding:12px;border:1px solid #ccd5c2;border-radius:7px;background:#f7f9f2;color:#45573c;font:11px/1.5 Consolas,monospace}
+.appearance-copy-button{margin-top:15px;width:100%;justify-content:center}
+.appearance-share-dialog .appearance-share-status{font-size:11px;line-height:1.6;margin:11px 0 0;min-height:35px;color:#596c4e}
+.appearance-share-dialog .appearance-local-note{background:#fbf5e7;color:#856735;font-size:11px;line-height:1.6;border-radius:6px;padding:11px;margin:12px 0}
+@media(max-width:760px){.appearance-share-button{font-size:12px;padding:13px}.appearance-share-hint{font-size:10px}.appearance-share-dialog{padding:30px 23px 22px}.appearance-share-dialog h2{font-size:27px}.appearance-share-url{font-size:12px}.appearance-copy-button{font-size:12px;padding:12px}}

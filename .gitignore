@@ -1,0 +1,16 @@
+node_modules/
+dist/
+qa/
+*.log
+.env
+.env.*
+!.env.example
+.codex/
+.agents/
+.DS_Store
+Thumbs.db
+
+# Fișiere locale din alte proiecte, în afara configuratorului web.
+Fusion_Insula_Masa_Extensibila/
+output/
+reference-insula-masa-extensibila.png

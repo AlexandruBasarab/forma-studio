@@ -1,0 +1,67 @@
+const { chromium } = require('playwright');
+const { pathToFileURL } = require('node:url');
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+(async () => {
+  fs.mkdirSync(path.join(__dirname,'qa'),{recursive:true});
+  const browser=await chromium.launch({channel:process.env.PLAYWRIGHT_CHANNEL || undefined,headless:true,args:['--allow-file-access-from-files','--enable-unsafe-swiftshader']});
+  const context=await browser.newContext({viewport:{width:1440,height:1000},acceptDownloads:true});
+  await context.setOffline(true);
+  const page=await context.newPage();
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(pathToFileURL(path.join(__dirname,'configurator-mobilier.html')).href);
+  await page.waitForFunction(()=>window.FormaConfigurator && document.querySelector('#loading').hidden);
+  assert.equal(await page.locator('[data-model]').count(),2);
+  assert.equal(await page.locator('[data-palette]').count(),3);
+  await page.screenshot({path:path.join(__dirname,'qa/cabinet-desktop.png')});
+  for(const preset of ['oak','cashmere','sage']){
+    await page.click('[data-palette="'+preset+'"]');
+    await page.waitForFunction(key=>window.FormaConfigurator.getState().palette===key,preset);
+    const result=await page.evaluate(()=>({state:FormaConfigurator.getState(),colors:[...new Set(FormaConfigurator.getScene().getObjectByName(FormaConfigurator.getState().model).children.flatMap(x=>x.material?.color?[x.material.color.getHexString()]:[]))]}));
+    assert.equal(result.state.palette,preset);
+  }
+  for(const [role,value] of [['top','#bb3355'],['fronts','#345678'],['body','#eeeecc']]){
+    await page.fill('#'+role+'Hex',value);await page.locator('#'+role+'Hex').press('Tab');
+    await page.waitForFunction(([r,v])=>FormaConfigurator.getState()[r]===v,[role,value]);
+  }
+  let state=await page.evaluate(()=>FormaConfigurator.getState());
+  assert.equal(state.top,'#bb3355');assert.equal(state.fronts,'#345678');assert.equal(state.body,'#eeeecc');assert.equal(state.palette,null);
+  await page.click('[data-palette="sage"]');
+  await page.check('#doorsOpen');await page.click('#dimensionsBtn');
+  await page.screenshot({path:path.join(__dirname,'qa/cabinet-open.png')});
+  await page.uncheck('#doorsOpen');await page.uncheck('#glass');
+  await page.screenshot({path:path.join(__dirname,'qa/cabinet-solid.png')});
+  await page.check('#glass');
+  await page.click('[data-model="bar"]');
+  await page.waitForFunction(()=>FormaConfigurator.getMetrics().width===190);
+  await page.screenshot({path:path.join(__dirname,'qa/bar-desktop.png')});
+  await page.locator('#extension').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.waitForFunction(()=>FormaConfigurator.getMetrics().width===110);
+  await page.screenshot({path:path.join(__dirname,'qa/bar-retracted.png')});
+  await page.locator('#extension').evaluate(el=>{el.value='100';el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.check('#doorsOpen');await page.click('[data-view="back"]');
+  await page.screenshot({path:path.join(__dirname,'qa/bar-back-open.png')});
+  await page.click('[data-view="perspective"]');await page.uncheck('#doorsOpen');
+  const firstView=await page.locator('canvas').first().screenshot();
+  const bounds=await page.locator('#viewport').boundingBox();
+  await page.mouse.move(bounds.x+bounds.width/2,bounds.y+bounds.height/2);await page.mouse.down();await page.mouse.move(bounds.x+bounds.width/2+110,bounds.y+bounds.height/2+30,{steps:8});await page.mouse.up();
+  const rotated=await page.locator('canvas').first().screenshot();assert.notDeepEqual(firstView,rotated,'Drag must rotate 3D');
+  await page.click('#fitBtn');
+  const pngPromise=page.waitForEvent('download');await page.click('#pngBtn');const png=await pngPromise;await png.saveAs(path.join(__dirname,'qa/export.png'));
+  const savePromise=page.waitForEvent('download');await page.click('#saveBtn');const save=await savePromise;const projectPath=path.join(__dirname,'qa/project.json');await save.saveAs(projectPath);
+  const saved=JSON.parse(fs.readFileSync(projectPath,'utf8'));assert.equal(saved.configuration.model,'bar');
+  await page.click('[data-palette="cashmere"]');
+  await page.setInputFiles('#projectFile',projectPath);await page.waitForFunction(()=>FormaConfigurator.getState().palette==='sage');
+  await page.reload();await page.waitForFunction(()=>window.FormaConfigurator);assert.equal(await page.evaluate(()=>FormaConfigurator.getState().model),'bar');
+  await page.click('#trendsBtn');assert(await page.locator('#trendsDialog').isVisible());await page.locator('#trendsDialog .dialog-close').click();
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:path.join(__dirname,'qa/mobile.png'),fullPage:true});
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No mobile horizontal overflow');
+  await page.click('[data-model="custom"]');await page.click('#resetBtn');
+  await page.setViewportSize({width:1440,height:1000});
+  await page.screenshot({path:path.join(__dirname,'qa/cabinet-final.png')});
+  assert.deepEqual(errors,[]);
+  console.log(JSON.stringify({passed:true,offline:true,models:2,palettes:3,independentColors:true,extensionRange:[110,190],orbit:true,pngExport:true,jsonRoundTrip:true,persistence:true,mobileNoOverflow:true,pageErrors:errors},null,2));
+  await browser.close();
+})().catch(e=>{console.error(e);process.exit(1);});

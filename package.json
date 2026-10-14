@@ -1,0 +1,18 @@
+{
+  "name": "forma-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Configurator 3D de mobilier cu dimensiuni, culori și finisaje editabile.",
+  "scripts": {
+    "build": "node build.cjs",
+    "start": "node serve.cjs",
+    "test": "npm run build && node qa.cjs && node qa-dimensions.cjs && node qa-countertops.cjs && node qa-sharing.cjs",
+    "test:photo": "npm run build && node qa-photo.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}
