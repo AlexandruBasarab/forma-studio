@@ -5,6 +5,10 @@
   function workshop(settings) {
     const T = window.THREE;
     const o = Object.assign({ body: '#ede9df', fronts: '#ede9df', top: '#c5aa80', hardware: '#44423e', bodyFinish: 'matte', frontsFinish: 'matte', topFinish: 'wood', glass: true, doorsOpen: false, edgeDetails: true }, settings);
+    for (const role of ['frontsUpper', 'frontsLower']) {
+      o[role] = o[role] || o.fronts;
+      o[role + 'Finish'] = o[role + 'Finish'] || o.frontsFinish;
+    }
     const group = new T.Group();
     const cube = new T.BoxGeometry(1, 1, 1);
     const edgeGeometry = o.edgeDetails ? new T.EdgesGeometry(cube) : null;
@@ -55,11 +59,14 @@
         params.roughness = finish === 'wood' ? 0.61 : 0.4;
       }
       materials[role] = new T.MeshStandardMaterial(params);
+      materials[role].name = 'cabinet-material-' + role;
+      materials[role].userData = { role, finish: finish || 'matte' };
       return materials[role];
     }
 
     function box(w, h, d, x, y, z, role, parent, details) {
       const mesh = new T.Mesh(cube, material(role || 'body'));
+      mesh.userData.role = role || 'body';
       mesh.scale.set(w, h, d); mesh.position.set(x, y, z);
       mesh.castShadow = role !== 'glass'; mesh.receiveShadow = true;
       (parent || group).add(mesh);
@@ -78,13 +85,13 @@
       box(0.8, 0.8, 1.8, x, y + h / 2 - 0.4, z + 0.9, 'hardware', parent, false);
     }
 
-    function framedPanel(w, h, x, y, z, parent, isGlass) {
+    function framedPanel(w, h, x, y, z, parent, isGlass, role) {
       const border = isGlass ? 2.4 : Math.min(3.4, w / 8);
-      box(w, border, 2, x, y - h / 2 + border / 2, z, 'fronts', parent);
-      box(w, border, 2, x, y + h / 2 - border / 2, z, 'fronts', parent);
-      box(border, h - border * 2, 2, x - w / 2 + border / 2, y, z, 'fronts', parent);
-      box(border, h - border * 2, 2, x + w / 2 - border / 2, y, z, 'fronts', parent);
-      box(w - border * 2, h - border * 2, isGlass ? 0.35 : 1.2, x, y, z - 0.1, isGlass ? 'glass' : 'fronts', parent);
+      box(w, border, 2, x, y - h / 2 + border / 2, z, role, parent);
+      box(w, border, 2, x, y + h / 2 - border / 2, z, role, parent);
+      box(border, h - border * 2, 2, x - w / 2 + border / 2, y, z, role, parent);
+      box(border, h - border * 2, 2, x + w / 2 - border / 2, y, z, role, parent);
+      box(w - border * 2, h - border * 2, isGlass ? 0.35 : 1.2, x, y, z - 0.1, isGlass ? 'glass' : role, parent);
     }
 
     function hingedDoor(x, y, z, w, h, hinge, isGlass) {
@@ -93,7 +100,7 @@
       pivot.position.set(x - sign * w / 2, y, z);
       group.add(pivot);
       const cx = sign * w / 2;
-      framedPanel(w, h, cx, 0, 0, pivot, isGlass);
+      framedPanel(w, h, cx, 0, 0, pivot, isGlass, 'frontsUpper');
       const handleX = sign * (w - 4);
       pull(handleX, -h / 2 + 13, 1, pivot, 8);
       // Hinges are visible even with the doors shut.
@@ -137,7 +144,7 @@
       { x: 48.7, z: 23.7, handle: 1 }
     ];
     leaves.forEach(leaf => {
-      framedPanel(97.1, 75.2, leaf.x, 47, leaf.z, group, o.glass);
+      framedPanel(97.1, 75.2, leaf.x, 47, leaf.z, group, o.glass, 'frontsLower');
       pull(leaf.x + leaf.handle * 40, 47, leaf.z + 1, group, 9);
     });
 

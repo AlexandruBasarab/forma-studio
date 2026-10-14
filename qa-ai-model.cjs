@@ -118,15 +118,35 @@ const handle = first.group.getObjectByName('photo-hardware');
 assert.equal(handle.geometry.type, 'CylinderGeometry');
 assert.equal(handle.geometry.parameters.openEnded, false, 'Cylinder has solid end caps');
 const scaledSize = { width: 197, height: 93, depth: 77 };
-const edited = build({ photo: fixture, size: scaledSize, body: '#123456', fronts: '#654321', top: '#abcdef', bodyFinish: 'wood', frontsFinish: 'matte', topFinish: 'stone' });
+const edited = build({ photo: fixture, size: scaledSize, body: '#123456', frontsUpper: '#654321', frontsLower: '#6a8c10', top: '#abcdef', bodyFinish: 'wood', frontsUpperFinish: 'matte', frontsLowerFinish: 'wood', topFinish: 'stone' });
 assertDimensions(edited.group, scaledSize);
-for (const [role, hex, textured] of [['body', '123456', true], ['fronts', '654321', false], ['top', 'abcdef', true]]) {
+for (const [role, hex, textured] of [['body', '123456', true], ['frontsUpper', '654321', false], ['top', 'abcdef', true]]) {
   const roleMeshes = meshes(edited.group).filter(mesh => mesh.userData.role === role);
   assert(roleMeshes.length);
   assert(roleMeshes.every(mesh => mesh.material.color.getHexString() === hex));
   assert(roleMeshes.every(mesh => Boolean(mesh.material.map) === textured));
 }
 assert.equal(edited.group.getObjectByName('photo-hardware').material.map, null);
+const splitFixture = clone(fixture);
+splitFixture.parts.push(part('Ușă inferioară', 'fronts', { x: 0, y: 0.2, z: 0.45 }, { x: 0.6, y: 0.3, z: 0.04 }));
+const splitOptions = { frontsUpper: '#ab3456', frontsLower: '#23768a', frontsUpperFinish: 'wood', frontsLowerFinish: 'stone' };
+const splitAI = build({ photo: splitFixture, size: scaledSize, ...splitOptions });
+assertDimensions(splitAI.group, scaledSize);
+for (const role of ['frontsUpper', 'frontsLower']) {
+  const fronts = meshes(splitAI.group).filter(mesh => mesh.userData.role === role);
+  assert.equal(fronts.length, 1, 'An AI front remains a whole panel');
+  assert(fronts.every(mesh => mesh.material.color.getHexString() === splitOptions[role].slice(1)));
+  assert(fronts.every(mesh => mesh.material.userData.finish === splitOptions[role + 'Finish']));
+}
+const shiftedFixture = clone(fixture);
+shiftedFixture.parts = [
+  part('Corp', 'body', { x: 0, y: 1.6, z: 0 }, { x: 1, y: 0.8, z: 1 }),
+  part('Front jos', 'fronts', { x: 0, y: 1.4, z: 0.48 }, { x: 0.8, y: 0.3, z: 0.04 }),
+  part('Front sus', 'fronts', { x: 0, y: 1.8, z: 0.48 }, { x: 0.8, y: 0.3, z: 0.04 })
+];
+const shifted = build({ photo: shiftedFixture, ...splitOptions });
+assert.equal(meshes(shifted.group).filter(mesh => mesh.userData.role === 'frontsUpper').length, 1, 'AI zones use actual geometry bounds, not a fixed normalized height');
+assert.equal(meshes(shifted.group).filter(mesh => mesh.userData.role === 'frontsLower').length, 1);
 const rotated = clone(fixture);
 rotated.parts[0].rotation = { x: 24, y: -37, z: 15 };
 rotated.parts[0].position = { x: 0.8, y: 1.5, z: -0.7 };
@@ -142,4 +162,12 @@ const legacy = {
 };
 assert.equal(validateModel(legacy).version, 1);
 assertDimensions(build({ photo: legacy, size: scaledSize }).group, scaledSize);
+const legacySplit = build({ photo: legacy, size: scaledSize, ...splitOptions });
+assertDimensions(legacySplit.group, scaledSize);
+for (const role of ['frontsUpper', 'frontsLower']) {
+  const fronts = meshes(legacySplit.group).filter(mesh => mesh.userData.role === role);
+  assert(fronts.length, 'Legacy photo surfaces contain both front zones');
+  assert(fronts.every(mesh => mesh.material.color.getHexString() === splitOptions[role].slice(1)));
+  assert(fronts.every(mesh => mesh.material.userData.finish === splitOptions[role + 'Finish']));
+}
 console.log(JSON.stringify({ passed: true, rejectedMalformedModels: invalidMutations.length + 3, independentMaterials: true, editableDimensions: true, closedPrimitives: true, openLegSpace: true, rotatedBounds: true, legacyProjects: true }, null, 2));

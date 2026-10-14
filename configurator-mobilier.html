@@ -143,7 +143,7 @@ THE SOFTWARE.
 .configuration-share-summary>div{display:grid;grid-template-columns:94px minmax(0,1fr);gap:10px;align-items:baseline}
 .configuration-share-summary dt{font-size:10px;color:var(--muted)}
 .configuration-share-summary dd{margin:0;font-size:11px;line-height:1.5;color:#45573c;overflow-wrap:anywhere;white-space:pre-line}
-.appearance-share-preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:14px 0;margin-bottom:10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.appearance-share-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px;padding:14px 0;margin-bottom:10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .appearance-share-preview>div{display:flex;gap:7px;align-items:flex-start;min-width:0}
 .appearance-share-preview i{display:block;width:24px;height:24px;flex-shrink:0;border:1px solid #0002;border-radius:5px}
 .appearance-share-preview strong{display:block;font-size:10px;font-weight:600;line-height:1.4}
@@ -154,7 +154,7 @@ THE SOFTWARE.
 .appearance-share-dialog .appearance-share-status{font-size:11px;line-height:1.6;margin:11px 0 0;min-height:35px;color:#596c4e}
 .appearance-share-dialog .appearance-local-note{background:#fbf5e7;color:#856735;font-size:11px;line-height:1.6;border-radius:6px;padding:11px;margin:12px 0}
 @media(max-width:760px){.appearance-share-button{font-size:12px;padding:13px}.appearance-share-hint{font-size:10px}.appearance-share-dialog{padding:30px 23px 22px}.appearance-share-dialog h2{font-size:27px}.appearance-share-url{font-size:12px}.appearance-copy-button{font-size:12px;padding:12px}}
-@media(max-width:420px){.configuration-share-summary{padding:12px}.configuration-share-summary>div{grid-template-columns:78px minmax(0,1fr);gap:8px}.appearance-share-preview{gap:8px}.appearance-share-preview>div{flex-direction:column;gap:5px}.appearance-share-preview strong{font-size:9px}}
+@media(max-width:420px){.configuration-share-summary{padding:12px}.configuration-share-summary>div{grid-template-columns:78px minmax(0,1fr);gap:8px}.appearance-share-preview{gap:12px 8px}.appearance-share-preview>div{gap:6px}.appearance-share-preview strong{font-size:9px}}
 </style>
 <style>/* Theme selection is independent of furniture colors and shared configurations. */
 html[data-theme="light"] { color-scheme: light; }
@@ -370,8 +370,10 @@ html[data-theme="dark"] #photoDialog #photoStatus[data-kind="success"] { color: 
   </div></section>
   <section class="control-section"><div class="section-heading"><h2><span>05</span> Culori & finisaje</h2><small id="paletteStatus">Salvie & stejar</small></div>
   <div class="material-row"><label class="color-swatch" for="topColor"><input type="color" id="topColor" value="#c5a277" aria-label="Culoare Blat / Countertop"></label><div class="material-name"><label for="topColor">Blat / Countertop</label><input class="hex-input" id="topHex" value="#C5A277" maxlength="7" aria-label="Cod HEX blat" spellcheck="false"></div><select id="topFinish" aria-label="Finisaj blat"><option value="wood">Lemn</option><option value="matte">Mat</option><option value="stone">Piatră</option></select></div>
-  <div class="material-row"><label class="color-swatch" for="frontsColor"><input type="color" id="frontsColor" value="#87927b" aria-label="Culoare Fronturi / Uși"></label><div class="material-name"><label for="frontsColor">Fronturi / Uși</label><input class="hex-input" id="frontsHex" value="#87927B" maxlength="7" aria-label="Cod HEX fronturi" spellcheck="false"></div><select id="frontsFinish" aria-label="Finisaj fronturi"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
+  <div class="material-row"><label class="color-swatch" for="frontsUpperColor"><input type="color" id="frontsUpperColor" value="#87927b" aria-label="Culoare Fronturi / Uși — Sus" aria-describedby="frontZonesHelp"></label><div class="material-name"><label for="frontsUpperColor">Fronturi / Uși — Sus</label><input class="hex-input" id="frontsUpperHex" value="#87927B" maxlength="7" aria-label="Cod HEX fronturi sus" spellcheck="false"></div><select id="frontsUpperFinish" aria-label="Finisaj fronturi sus"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
+  <div class="material-row"><label class="color-swatch" for="frontsLowerColor"><input type="color" id="frontsLowerColor" value="#87927b" aria-label="Culoare Fronturi / Uși — Jos" aria-describedby="frontZonesHelp"></label><div class="material-name"><label for="frontsLowerColor">Fronturi / Uși — Jos</label><input class="hex-input" id="frontsLowerHex" value="#87927B" maxlength="7" aria-label="Cod HEX fronturi jos" spellcheck="false"></div><select id="frontsLowerFinish" aria-label="Finisaj fronturi jos"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
   <div class="material-row"><label class="color-swatch" for="bodyColor"><input type="color" id="bodyColor" value="#eff0e7" aria-label="Culoare Carcasă și Corp"></label><div class="material-name"><label for="bodyColor">Carcasă & Corp</label><input class="hex-input" id="bodyHex" value="#EFF0E7" maxlength="7" aria-label="Cod HEX carcasă" spellcheck="false"></div><select id="bodyFinish" aria-label="Finisaj carcasă"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
+  <p id="frontZonesHelp" class="size-note">Sus / jos: ușile dulapului; sertarul / ușile barului. La modelele AI, fronturile sunt grupate după înălțime.</p>
   </section>
   <section class="control-section"><div class="section-heading"><h2><span>06</span> Detalii & funcții</h2></div>
     <div id="extensionControl" class="extension-control" hidden><div class="range-label"><label for="extension">Extensia mesei</label><output id="extensionValue" for="extension">110 cm</output></div><input id="extension" type="range" min="0" max="100" value="100"><div class="range-ends"><span>Retrasă</span><span>Extinsă</span></div></div>
@@ -410,7 +412,8 @@ html[data-theme="dark"] #photoDialog #photoStatus[data-kind="success"] { color: 
   </dl>
   <div class="appearance-share-preview">
     <div><i id="share-top-chip" aria-hidden="true"></i><span><strong>Blat / Countertop</strong><small id="share-top-value"></small></span></div>
-    <div><i id="share-fronts-chip" aria-hidden="true"></i><span><strong>Fronturi / Uși</strong><small id="share-fronts-value"></small></span></div>
+    <div><i id="share-frontsUpper-chip" aria-hidden="true"></i><span><strong>Fronturi / Uși — Sus</strong><small id="share-frontsUpper-value"></small></span></div>
+    <div><i id="share-frontsLower-chip" aria-hidden="true"></i><span><strong>Fronturi / Uși — Jos</strong><small id="share-frontsLower-value"></small></span></div>
     <div><i id="share-body-chip" aria-hidden="true"></i><span><strong>Carcasă & Corp</strong><small id="share-body-value"></small></span></div>
   </div>
   <label class="appearance-share-label" for="appearanceShareUrl">Linkul configurației</label>
@@ -435,6 +438,10 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   function workshop(settings) {
     const T = window.THREE;
     const o = Object.assign({ body: '#ede9df', fronts: '#ede9df', top: '#c5aa80', hardware: '#44423e', bodyFinish: 'matte', frontsFinish: 'matte', topFinish: 'wood', glass: true, doorsOpen: false, edgeDetails: true }, settings);
+    for (const role of ['frontsUpper', 'frontsLower']) {
+      o[role] = o[role] || o.fronts;
+      o[role + 'Finish'] = o[role + 'Finish'] || o.frontsFinish;
+    }
     const group = new T.Group();
     const cube = new T.BoxGeometry(1, 1, 1);
     const edgeGeometry = o.edgeDetails ? new T.EdgesGeometry(cube) : null;
@@ -485,11 +492,14 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
         params.roughness = finish === 'wood' ? 0.61 : 0.4;
       }
       materials[role] = new T.MeshStandardMaterial(params);
+      materials[role].name = 'cabinet-material-' + role;
+      materials[role].userData = { role, finish: finish || 'matte' };
       return materials[role];
     }
 
     function box(w, h, d, x, y, z, role, parent, details) {
       const mesh = new T.Mesh(cube, material(role || 'body'));
+      mesh.userData.role = role || 'body';
       mesh.scale.set(w, h, d); mesh.position.set(x, y, z);
       mesh.castShadow = role !== 'glass'; mesh.receiveShadow = true;
       (parent || group).add(mesh);
@@ -508,13 +518,13 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       box(0.8, 0.8, 1.8, x, y + h / 2 - 0.4, z + 0.9, 'hardware', parent, false);
     }
 
-    function framedPanel(w, h, x, y, z, parent, isGlass) {
+    function framedPanel(w, h, x, y, z, parent, isGlass, role) {
       const border = isGlass ? 2.4 : Math.min(3.4, w / 8);
-      box(w, border, 2, x, y - h / 2 + border / 2, z, 'fronts', parent);
-      box(w, border, 2, x, y + h / 2 - border / 2, z, 'fronts', parent);
-      box(border, h - border * 2, 2, x - w / 2 + border / 2, y, z, 'fronts', parent);
-      box(border, h - border * 2, 2, x + w / 2 - border / 2, y, z, 'fronts', parent);
-      box(w - border * 2, h - border * 2, isGlass ? 0.35 : 1.2, x, y, z - 0.1, isGlass ? 'glass' : 'fronts', parent);
+      box(w, border, 2, x, y - h / 2 + border / 2, z, role, parent);
+      box(w, border, 2, x, y + h / 2 - border / 2, z, role, parent);
+      box(border, h - border * 2, 2, x - w / 2 + border / 2, y, z, role, parent);
+      box(border, h - border * 2, 2, x + w / 2 - border / 2, y, z, role, parent);
+      box(w - border * 2, h - border * 2, isGlass ? 0.35 : 1.2, x, y, z - 0.1, isGlass ? 'glass' : role, parent);
     }
 
     function hingedDoor(x, y, z, w, h, hinge, isGlass) {
@@ -523,7 +533,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       pivot.position.set(x - sign * w / 2, y, z);
       group.add(pivot);
       const cx = sign * w / 2;
-      framedPanel(w, h, cx, 0, 0, pivot, isGlass);
+      framedPanel(w, h, cx, 0, 0, pivot, isGlass, 'frontsUpper');
       const handleX = sign * (w - 4);
       pull(handleX, -h / 2 + 13, 1, pivot, 8);
       // Hinges are visible even with the doors shut.
@@ -567,7 +577,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       { x: 48.7, z: 23.7, handle: 1 }
     ];
     leaves.forEach(leaf => {
-      framedPanel(97.1, 75.2, leaf.x, 47, leaf.z, group, o.glass);
+      framedPanel(97.1, 75.2, leaf.x, 47, leaf.z, group, o.glass, 'frontsLower');
       pull(leaf.x + leaf.handle * 40, 47, leaf.z + 1, group, 9);
     });
 
@@ -709,6 +719,10 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
 
   function context(options) {
     const o = Object.assign({ body: '#e6e5de', fronts: '#ecece7', top: '#d5b685', hardware: '#666963', bodyFinish: 'matte', frontsFinish: 'matte', topFinish: 'wood', extension: 1, doorsOpen: false, edgeDetails: true }, options || {});
+    for (const role of ['frontsUpper', 'frontsLower']) {
+      o[role] = o[role] || o.fronts;
+      o[role + 'Finish'] = o[role + 'Finish'] || o.frontsFinish;
+    }
     o.extension = Math.max(0, Math.min(1, Number(o.extension) || 0));
     const finishMaterial = (color, finish) => new T.MeshStandardMaterial({
       color, map: finish === 'wood' ? woodTexture() : finish === 'stone' ? stoneTexture() : null,
@@ -716,16 +730,22 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     });
     const mat = {
       body: finishMaterial(o.body, o.bodyFinish),
-      front: finishMaterial(o.fronts, o.frontsFinish),
+      frontsUpper: finishMaterial(o.frontsUpper, o.frontsUpperFinish),
+      frontsLower: finishMaterial(o.frontsLower, o.frontsLowerFinish),
       top: finishMaterial(o.top, o.topFinish),
       metal: new T.MeshStandardMaterial({ color: o.hardware, metalness: 0.72, roughness: 0.27 }),
       dark: new T.MeshStandardMaterial({ color: '#252724', roughness: 0.8 }),
       drawer: new T.MeshStandardMaterial({ color: '#cfbd9f', roughness: 0.78 }),
       slot: new T.MeshStandardMaterial({ color: '#393c36', roughness: 0.9 }),
     };
+    for (const role of ['body', 'frontsUpper', 'frontsLower', 'top']) {
+      mat[role].name = 'island-material-' + role;
+      mat[role].userData = { role, finish: o[role + 'Finish'] };
+    }
     const edges = new T.LineBasicMaterial({ color: new T.Color(o.body).multiplyScalar(0.52), transparent: true, opacity: 0.22 });
     function box(parent, w, h, d, x, y, z, material = mat.body, outline = false) {
       const mesh = new T.Mesh(new T.BoxGeometry(w, h, d), material);
+      if (material.userData.role) mesh.userData.role = material.userData.role;
       mesh.position.set(x, y, z); mesh.castShadow = true; mesh.receiveShadow = true;
       parent.add(mesh);
       if (outline && o.edgeDetails) {
@@ -747,17 +767,17 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       sphere.scale.z = 0.68; sphere.position.set(x, y, z + face * 1.25); sphere.castShadow = true; parent.add(sphere);
       cylinder(parent, 0.83, 0.16, x, y, z, mat.metal);
     }
-    function panel(parent, width, height, x, y, z, face = 1) {
+    function panel(parent, width, height, x, y, z, face = 1, role = 'frontsLower') {
       const group = new T.Group(); group.position.set(x, y, z); parent.add(group);
-      box(group, width, height, 1.5, 0, 0, 0, mat.front, true);
+      box(group, width, height, 1.5, 0, 0, 0, mat[role], true);
       const frame = Math.min(3.2, width * 0.14, height * 0.16);
       const frontZ = face * 1.04;
-      box(group, frame, height, 0.7, -width / 2 + frame / 2, 0, frontZ, mat.front, true);
-      box(group, frame, height, 0.7, width / 2 - frame / 2, 0, frontZ, mat.front, true);
-      box(group, width - frame * 2, frame, 0.7, 0, height / 2 - frame / 2, frontZ, mat.front, true);
-      box(group, width - frame * 2, frame, 0.7, 0, -height / 2 + frame / 2, frontZ, mat.front, true);
+      box(group, frame, height, 0.7, -width / 2 + frame / 2, 0, frontZ, mat[role], true);
+      box(group, frame, height, 0.7, width / 2 - frame / 2, 0, frontZ, mat[role], true);
+      box(group, width - frame * 2, frame, 0.7, 0, height / 2 - frame / 2, frontZ, mat[role], true);
+      box(group, width - frame * 2, frame, 0.7, 0, -height / 2 + frame / 2, frontZ, mat[role], true);
       if (o.edgeDetails && width > 15 && height > 15) {
-        const lineColor = new T.Color(o.fronts).multiplyScalar(0.68);
+        const lineColor = new T.Color(o[role]).multiplyScalar(0.68);
         const inner = new T.LineBasicMaterial({ color: lineColor, transparent: true, opacity: 0.25 });
         const iw = width / 2 - frame - 0.4, ih = height / 2 - frame - 0.4;
         const points = [[-iw, -ih], [iw, -ih], [iw, ih], [-iw, ih], [-iw, -ih]].map(([xx, yy]) => new T.Vector3(xx, yy, face * 0.79));
@@ -777,7 +797,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       return pivot;
     }
     function drawer(parent, width, height, depth, x, y, z, face = 1, twoKnobs = false) {
-      panel(parent, width, height, x, y, z, face);
+      panel(parent, width, height, x, y, z, face, 'frontsUpper');
       if (twoKnobs) { knob(parent, x - width * 0.28, y, z + face * 1.48, face); knob(parent, x + width * 0.28, y, z + face * 1.48, face); }
       else knob(parent, x, y, z + face * 1.48, face);
       box(parent, width - 3, 0.8, depth, x, y - height / 2 + 1.4, z - face * (depth / 2 + 1), mat.drawer);
@@ -1030,6 +1050,16 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   const finite = value => typeof value === 'number' && Number.isFinite(value);
   const validColor = value => typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
 
+  function appearance(options, photo, role) {
+    const sourceRole = role === 'frontsUpper' || role === 'frontsLower' ? 'fronts' : role;
+    const selectedFinish = options[role + 'Finish'] || options[sourceRole + 'Finish'];
+    return {
+      color: validColor(options[role]) ? options[role] : validColor(options[sourceRole]) ? options[sourceRole]
+        : photo.colors[sourceRole] || DEFAULT_COLORS[sourceRole],
+      finish: ['matte', 'wood', 'stone'].includes(selectedFinish) ? selectedFinish : 'matte'
+    };
+  }
+
   function validateDescriptor(value) {
     if (isRecord(value) && value.version === 2) {
       if (!globalThis.FurnitureAI) throw new Error('Validatorul pentru modelele AI nu este disponibil.');
@@ -1150,10 +1180,12 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     const grooveDepth = Math.min(0.75, size.depth * 0.04);
     const makeBands = (lines, length) => lines.map(n => [Math.max(0, n - grooveWidth / length / 2), Math.min(1, n + grooveWidth / length / 2)]);
     const xBands = makeBands(dividers.vertical, size.width), yBands = makeBands(dividers.horizontal, size.height);
-    const edges = (count, bands) => Array.from(new Set([
-      ...Array.from({ length: count + 1 }, (_, i) => i / count), ...bands.flat()
+    const edges = (count, bands, extra = []) => Array.from(new Set([
+      ...Array.from({ length: count + 1 }, (_, i) => i / count), ...bands.flat(), ...extra
     ])).sort((a, b) => a - b);
-    const xEdges = edges(originalColumns, xBands), yEdges = edges(originalRows, yBands);
+    // Retain the closed silhouette while separating front materials at mid-height,
+    // including grids with an odd number of rows or a single occupied row.
+    const xEdges = edges(originalColumns, xBands), yEdges = edges(originalRows, yBands, [0.5]);
     const columns = xEdges.length - 1, rows = yEdges.length - 1;
     const mask = new Uint8Array(columns * rows);
     let volumeCm3 = 0;
@@ -1172,7 +1204,8 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     const atY = y => size.height - yEdges[y] * size.height;
     const rear = -size.depth / 2, front = size.depth / 2;
     const frontAt = kind => kind === 0 ? rear : kind === 2 ? front - grooveDepth : front;
-    const surfaces = Object.fromEntries(['body', 'fronts', 'top'].map(role => [role, { positions: [], normals: [], uvs: [], indices: [] }]));
+    const frontRole = row => yEdges[row] < 0.5 ? 'frontsUpper' : 'frontsLower';
+    const surfaces = Object.fromEntries(['body', 'frontsUpper', 'frontsLower', 'top'].map(role => [role, { positions: [], normals: [], uvs: [], indices: [] }]));
     let rectangleCount = 0, boundaryCount = 0;
 
     function quad(role, vertices, normal) {
@@ -1197,6 +1230,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       while (col + width < columns && kindAt(col + width, row) === kind && !visited[row * columns + col + width]) width++;
       let extend = true;
       while (row + height < rows && extend) {
+        if (kind !== 2 && frontRole(row + height) !== frontRole(row)) break;
         for (let dx = 0; dx < width; dx++) {
           if (kindAt(col + dx, row + height) !== kind || visited[(row + height) * columns + col + dx]) { extend = false; break; }
         }
@@ -1204,7 +1238,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       }
       for (let dy = 0; dy < height; dy++) for (let dx = 0; dx < width; dx++) visited[(row + dy) * columns + col + dx] = 1;
       const left = atX(col), right = atX(col + width), top = atY(row), bottom = atY(row + height);
-      quad(kind === 2 ? 'body' : 'fronts', [[left, bottom, surfaceZ], [right, bottom, surfaceZ], [right, top, surfaceZ], [left, top, surfaceZ]], [0, 0, 1]);
+      quad(kind === 2 ? 'body' : frontRole(row), [[left, bottom, surfaceZ], [right, bottom, surfaceZ], [right, top, surfaceZ], [left, top, surfaceZ]], [0, 0, 1]);
       quad('body', [[right, bottom, rear], [left, bottom, rear], [left, top, rear], [right, top, rear]], [0, 0, -1]);
       rectangleCount++;
     }
@@ -1248,22 +1282,24 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       volumeCm3,
       note: 'Volum aproximativ extrudat din siluetă; adâncimea este aleasă de utilizator, iar construcția ascunsă nu este dedusă.'
     };
-    for (const role of ['body', 'fronts', 'top']) {
+    for (const role of ['body', 'frontsUpper', 'frontsLower', 'top']) {
+      if (!surfaces[role].positions.length) continue;
       const data = surfaces[role], geometry = new T.BufferGeometry();
       geometry.setAttribute('position', new T.Float32BufferAttribute(data.positions, 3));
       geometry.setAttribute('normal', new T.Float32BufferAttribute(data.normals, 3));
       geometry.setAttribute('uv', new T.Float32BufferAttribute(data.uvs, 2));
       geometry.setIndex(data.indices);
       geometry.computeBoundingBox(); geometry.computeBoundingSphere();
-      const finish = ['matte', 'wood', 'stone'].includes(o[role + 'Finish']) ? o[role + 'Finish'] : 'matte';
+      const { color, finish } = appearance(o, photo, role);
       const params = {
-        color: validColor(o[role]) ? o[role] : (photo.colors[role] || DEFAULT_COLORS[role]),
+        color,
         roughness: finish === 'stone' ? 0.4 : 0.64, metalness: 0.02
       };
       const map = finishTexture(T, finish);
       if (map) params.map = map;
       const material = new T.MeshStandardMaterial(params);
       material.name = 'photo-material-' + role;
+      material.userData = { role, finish };
       const mesh = new T.Mesh(geometry, material);
       mesh.name = 'photo-' + role;
       mesh.userData.role = role;
@@ -1283,24 +1319,10 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     }
     const group = new T.Group(), parts = new T.Group();
     group.name = 'photo'; parts.name = 'photo-parts'; group.add(parts);
-    const materials = new Map(), roleCounts = {};
-    for (const part of photo.parts) {
-      const role = part.role;
-      let material = materials.get(role);
-      if (!material) {
-        const hardware = role === 'hardware';
-        const finish = !hardware && ['matte', 'wood', 'stone'].includes(options[role + 'Finish']) ? options[role + 'Finish'] : 'matte';
-        const params = {
-          color: validColor(options[role]) ? options[role] : (hardware ? '#4d5148' : photo.colors[role]),
-          roughness: hardware ? 0.32 : finish === 'stone' ? 0.4 : 0.64,
-          metalness: hardware ? 0.72 : 0.02
-        };
-        const map = finishTexture(T, finish);
-        if (map) params.map = map;
-        material = new T.MeshStandardMaterial(params);
-        material.name = 'photo-material-' + role;
-        materials.set(role, material);
-      }
+    // Use the actual rotated geometry to locate the object's vertical midpoint.
+    // Assign each complete front part to one zone, preserving doors as single pieces.
+    const bounds = new T.Box3();
+    const preparedParts = photo.parts.map(part => {
       const dimensions = [part.size.x * photo.size.width, part.size.y * photo.size.height, part.size.z * photo.size.depth];
       const geometry = part.shape === 'cylinder'
         ? new T.CylinderGeometry(0.5, 0.5, 1, 24, 1, false)
@@ -1310,19 +1332,43 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
       const rotation = new T.Euler(...['x', 'y', 'z'].map(axis => T.MathUtils.degToRad(part.rotation[axis])));
       geometry.applyMatrix4(new T.Matrix4().makeRotationFromEuler(rotation));
       geometry.translate(part.position.x * photo.size.width, part.position.y * photo.size.height, part.position.z * photo.size.depth);
+      geometry.computeBoundingBox();
+      bounds.union(geometry.boundingBox);
+      return { part, geometry };
+    });
+    const extent = bounds.getSize(new T.Vector3());
+    const center = bounds.getCenter(new T.Vector3());
+    const materials = new Map(), roleCounts = {};
+    for (const { part, geometry } of preparedParts) {
+      const partCenterY = (geometry.boundingBox.min.y + geometry.boundingBox.max.y) / 2;
+      const role = part.role === 'fronts' ? partCenterY >= center.y ? 'frontsUpper' : 'frontsLower' : part.role;
+      let material = materials.get(role);
+      if (!material) {
+        const hardware = role === 'hardware';
+        const { color, finish } = hardware ? { color: validColor(options.hardware) ? options.hardware : '#4d5148', finish: 'matte' }
+          : appearance(options, photo, role);
+        const params = {
+          color,
+          roughness: hardware ? 0.32 : finish === 'stone' ? 0.4 : 0.64,
+          metalness: hardware ? 0.72 : 0.02
+        };
+        const map = finishTexture(T, finish);
+        if (map) params.map = map;
+        material = new T.MeshStandardMaterial(params);
+        material.name = 'photo-material-' + role;
+        material.userData = { role, finish };
+        materials.set(role, material);
+      }
       const mesh = new T.Mesh(geometry, material);
       roleCounts[role] = (roleCounts[role] || 0) + 1;
       mesh.name = 'photo-' + role + (roleCounts[role] > 1 ? '-' + roleCounts[role] : '');
-      mesh.userData = { role, partName: part.name, shape: part.shape };
+      mesh.userData = { role, sourceRole: part.role, partName: part.name, shape: part.shape,
+        ...(part.role === 'fronts' ? { frontZone: role === 'frontsUpper' ? 'upper' : 'lower' } : {}) };
       mesh.castShadow = true; mesh.receiveShadow = true;
       parts.add(mesh);
     }
     // AI coordinates may include overhangs or rotated parts. Fit actual geometry,
     // so the user's dimensions describe the entire object, not an assumed box.
-    parts.updateMatrixWorld(true);
-    const bounds = new T.Box3().setFromObject(parts, true);
-    const extent = bounds.getSize(new T.Vector3());
-    const center = bounds.getCenter(new T.Vector3());
     parts.position.set(-center.x, -bounds.min.y, -center.z);
     group.scale.set(size.width / extent.x, size.height / extent.y, size.depth / extent.z);
     group.userData = {
@@ -1528,9 +1574,9 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   const T = window.THREE;
   const FEATURES = {photoImport:true};
   const PRESETS = {
-    oak: { name: 'Stejar & alb cald', top: '#eeeae1', fronts: '#b98c60', body: '#b98c60', topFinish: 'stone', frontsFinish: 'wood', bodyFinish: 'wood' },
-    cashmere: { name: 'Cașmir & nuc', top: '#866247', fronts: '#e7dfd2', body: '#ded6c9', topFinish: 'wood', frontsFinish: 'matte', bodyFinish: 'matte' },
-    sage: { name: 'Salvie & stejar', top: '#c5a277', fronts: '#87927b', body: '#eff0e7', topFinish: 'wood', frontsFinish: 'matte', bodyFinish: 'matte' }
+    oak: { name: 'Stejar & alb cald', top: '#eeeae1', frontsUpper: '#b98c60', frontsLower: '#b98c60', body: '#b98c60', topFinish: 'stone', frontsUpperFinish: 'wood', frontsLowerFinish: 'wood', bodyFinish: 'wood' },
+    cashmere: { name: 'Cașmir & nuc', top: '#866247', frontsUpper: '#e7dfd2', frontsLower: '#e7dfd2', body: '#ded6c9', topFinish: 'wood', frontsUpperFinish: 'matte', frontsLowerFinish: 'matte', bodyFinish: 'matte' },
+    sage: { name: 'Salvie & stejar', top: '#c5a277', frontsUpper: '#87927b', frontsLower: '#87927b', body: '#eff0e7', topFinish: 'wood', frontsUpperFinish: 'matte', frontsLowerFinish: 'matte', bodyFinish: 'matte' }
   };
   const MODELS = {
     custom: { title: 'Dulap vitrină', description: 'Depozitare generoasă. Detalii la vedere.', index: '01', builder: o => window.FurnitureCabinets.buildCustom(o) },
@@ -1540,10 +1586,12 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   const STORAGE = 'forma-furniture-v1';
   const APPEARANCE_PARAM = 'finisaje';
   const CONFIGURATION_PARAM = 'config';
-  const MATERIAL_ROLES = ['top', 'fronts', 'body'];
+  const MATERIAL_ROLES = ['top', 'frontsUpper', 'frontsLower', 'body'];
+  const MATERIAL_FIELDS = MATERIAL_ROLES.flatMap(role => [role, role+'Finish']);
+  const SPLIT_FRONT_FIELDS = ['frontsUpper', 'frontsLower', 'frontsUpperFinish', 'frontsLowerFinish'];
   const FINISH_LABELS = {wood:'Lemn', matte:'Mat', stone:'Piatră'};
   function appearancePayload() {
-    const payload = {v:1};
+    const payload = {v:2};
     for (const role of MATERIAL_ROLES) {
       payload[role] = state[role];
       payload[role+'Finish'] = state[role+'Finish'];
@@ -1554,19 +1602,27 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     if (!token || token.length > maxLength || !/^[A-Za-z0-9_-]+$/.test(token) || token.length % 4 === 1) throw new Error('Link invalid.');
     const json = atob(token.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(token.length/4)*4,'='));
     const data = JSON.parse(json);
-    if (!data || typeof data !== 'object' || Array.isArray(data) || data.v !== 1) throw new Error('Versiune necunoscută.');
+    if (!data || typeof data !== 'object' || Array.isArray(data) || ![1,2].includes(data.v)) throw new Error('Versiune necunoscută.');
     return data;
+  }
+  function validateAppearance(data, layout = 'auto') {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Culori sau finisaje invalide.');
+    // Older projects have one front material. A partially supplied new layout
+    // must fail validation instead of silently losing one of its front colors.
+    const legacy = layout === 'legacy' || (layout === 'auto' && !SPLIT_FRONT_FIELDS.some(key => Object.hasOwn(data,key)));
+    const appearance = {};
+    for (const role of MATERIAL_ROLES) {
+      const source = legacy && (role === 'frontsUpper' || role === 'frontsLower') ? 'fronts' : role;
+      if (typeof data[source] !== 'string' || !/^#[0-9a-f]{6}$/i.test(data[source]) || typeof data[source+'Finish'] !== 'string' || !Object.hasOwn(FINISH_LABELS,data[source+'Finish'])) throw new Error('Culoare sau finisaj invalid.');
+      appearance[role] = data[source].toLowerCase();
+      appearance[role+'Finish'] = data[source+'Finish'];
+    }
+    return appearance;
   }
   function decodeAppearance(token) {
     const data = decodeSharedData(token,1024);
-    const appearance = {};
-    // Copy only validated material fields; a shared palette cannot replace the project.
-    for (const role of MATERIAL_ROLES) {
-      if (typeof data[role] !== 'string' || !/^#[0-9a-f]{6}$/i.test(data[role]) || typeof data[role+'Finish'] !== 'string' || !Object.hasOwn(FINISH_LABELS,data[role+'Finish'])) throw new Error('Culoare sau finisaj invalid.');
-      appearance[role] = data[role].toLowerCase();
-      appearance[role+'Finish'] = data[role+'Finish'];
-    }
-    return appearance;
+    // Copy only material fields; a shared palette cannot replace the project.
+    return validateAppearance(data,data.v===1?'legacy':'split');
   }
   function configurationPayload() {
     return {
@@ -1584,7 +1640,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     if (!data.sizes || typeof data.sizes !== 'object' || Array.isArray(data.sizes) || !data.sizes.custom || !data.sizes.bar || !data.worktops || typeof data.worktops !== 'object' || Array.isArray(data.worktops)) throw new Error('Lipsesc dimensiunile sau blaturile.');
     // Reuse project validation, requiring every shared dimension and top setting.
     // Photo data is local-only and never accepted from a compact configuration link.
-    return validate({...data,photo:null,sizes:{custom:data.sizes.custom,bar:data.sizes.bar}});
+    return validate({...data,...validateAppearance(data,data.v===1?'legacy':'split'),photo:null,sizes:{custom:data.sizes.custom,bar:data.sizes.bar}},'split');
   }
   function shareUrl(mode = shareLinkMode || 'configuration') {
     const url = new URL(window.location.href);
@@ -1655,19 +1711,13 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     }
     return next;
   }
-  function validate(data) {
+  function validate(data, appearanceLayout = 'auto') {
     if (!data || typeof data !== 'object' || !Object.hasOwn(MODELS, data.model)) throw new Error('Proiectul nu conține un model compatibil.');
     const result = defaults();
     result.model = data.model;
     if(data.photo!=null)result.photo=validatePhoto(data.photo);
     if(data.model==='photo'&&!result.photo)throw new Error('Proiectul nu conține modelul generat din fotografie.');
-    for (const key of ['top', 'fronts', 'body']) {
-      if (typeof data[key] !== 'string' || !/^#[0-9a-f]{6}$/i.test(data[key])) throw new Error('Proiectul conține un cod de culoare invalid.');
-      result[key] = data[key].toLowerCase();
-      const finish = data[key + 'Finish'];
-      if (!['wood', 'matte', 'stone'].includes(finish)) throw new Error('Finisaj necunoscut.');
-      result[key + 'Finish'] = finish;
-    }
+    Object.assign(result,validateAppearance(data,appearanceLayout));
     if (typeof data.extension !== 'number' || !Number.isFinite(data.extension) || data.extension < 0 || data.extension > 1) throw new Error('Extensia trebuie să fie între 0 și 1.');
     result.extension = data.extension;
     for (const key of ['glass', 'doorsOpen', 'dimensions']) result[key] = data[key] === true;
@@ -1711,7 +1761,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     return {descriptor,thumbnail:value.thumbnail,name:typeof value.name==='string'?value.name.replace(/[\x00-\x1f]/g,'').slice(0,80):'Obiect importat',initialSize};
   }
   function matchedPalette(data) {
-    return Object.keys(PRESETS).find(key => ['top', 'fronts', 'body', 'topFinish', 'frontsFinish', 'bodyFinish'].every(prop => data[prop] === PRESETS[key][prop])) || null;
+    return Object.keys(PRESETS).find(key => MATERIAL_FIELDS.every(prop => data[prop] === PRESETS[key][prop])) || null;
   }
   let state = defaults();
   let storageAvailable = true;
@@ -1919,7 +1969,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     syncPhotoCard();
     document.querySelectorAll('[data-model]').forEach(button => { const active = button.dataset.model === state.model; button.classList.toggle('active', active); button.setAttribute('aria-pressed', active); });
     document.querySelectorAll('[data-palette]').forEach(button => { const active = button.dataset.palette === state.palette; button.classList.toggle('active', active); button.setAttribute('aria-pressed', active); });
-    for (const role of ['top','fronts','body']) {
+    for (const role of MATERIAL_ROLES) {
       $(role+'Color').value = state[role]; $(role+'Finish').value = state[role+'Finish'];
       // A queued model rebuild must not discard a HEX value that is still being typed.
       if(document.activeElement!==$(role+'Hex'))$(role+'Hex').value = state[role].toUpperCase();
@@ -2036,7 +2086,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   });
   document.querySelector('.model-grid').addEventListener('click',event=>{const button=event.target.closest('[data-model]');if(!button||state.model===button.dataset.model)return;const next=button.dataset.model;if(!Object.hasOwn(MODELS,next)||(next==='photo'&&!state.photo))return;state.model=next;state.doorsOpen=false;rebuild(true);});
   document.querySelectorAll('[data-palette]').forEach(button => button.addEventListener('click', () => { const key=button.dataset.palette; Object.assign(state, PRESETS[key], {palette:key}); syncControls(); scheduleRebuild(); }));
-  for(const role of ['top','fronts','body']) {
+  for(const role of MATERIAL_ROLES) {
     $(role+'Color').addEventListener('input', event => {state[role]=event.target.value;state.palette=matchedPalette(state);syncControls();scheduleRebuild();});
     $(role+'Hex').addEventListener('change', event => {
       let value=event.target.value.trim(); if(!value.startsWith('#'))value='#'+value;
@@ -2086,7 +2136,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   $('zoomIn').addEventListener('click', () => zoom(.86)); $('zoomOut').addEventListener('click', () => zoom(1.16)); $('fitBtn').addEventListener('click', () => fit(true));
   $('resetBtn').addEventListener('click', () => {const current=state.model,sizes=state.sizes,photo=state.photo,worktops=state.worktops;state=defaults();state.model=current;state.sizes=sizes;state.photo=photo;state.worktops=worktops;state.sizes[current]=originalSize(current);resetModelWorktops();rebuild(true);toast('Configurația modelului a fost resetată.');});
   function download(blob,name) { const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000); }
-  $('saveBtn').addEventListener('click', () => {const project={format:'forma-furniture',version:4,savedAt:new Date().toISOString(),configuration:state};download(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),'forma-'+state.model+'.json');toast('Proiect salvat. Îl poți redeschide în acest configurator.');});
+  $('saveBtn').addEventListener('click', () => {const project={format:'forma-furniture',version:5,savedAt:new Date().toISOString(),configuration:state};download(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),'forma-'+state.model+'.json');toast('Proiect salvat. Îl poți redeschide în acest configurator.');});
   $('shareAppearanceBtn').addEventListener('click', () => {
     if(state.model==='photo') {
       toast('Pentru a partaja mobilierul din fotografie, folosește „Salvează proiect” și trimite fișierul JSON.');
@@ -2113,7 +2163,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   $('importBtn').addEventListener('click', () => $('projectFile').click());
   $('projectFile').addEventListener('change', async event => {
     const file=event.target.files[0];if(!file)return;
-    try {if(file.size>500000)throw new Error('Fișierul este prea mare pentru un proiect.');const data=JSON.parse(await file.text());if(data.format!=='forma-furniture'||![1,2,3,4].includes(data.version))throw new Error('Alege un proiect JSON salvat din FORMĂ.');state=validate(data.configuration);rebuild(true);toast('Proiectul a fost încărcat.');}
+    try {if(file.size>500000)throw new Error('Fișierul este prea mare pentru un proiect.');const data=JSON.parse(await file.text());if(data.format!=='forma-furniture'||![1,2,3,4,5].includes(data.version))throw new Error('Alege un proiect JSON salvat din FORMĂ.');state=validate(data.configuration,data.version===5?'split':'auto');rebuild(true);toast('Proiectul a fost încărcat.');}
     catch(error){toast(error.message||'Proiectul nu a putut fi încărcat.');}
     event.target.value='';
   });
@@ -2128,7 +2178,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     const ctx=canvas.getContext('2d');ctx.fillStyle=dark?'#151d18':'#f4f4ee';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,0,0);
     ctx.fillStyle=dark?'#e4eadf':'#3f5137';ctx.font='30px Georgia';ctx.fillText('FORMĂ / '+MODELS[state.model].title,32,source.height+47);
     ctx.font='17px Segoe UI';ctx.fillStyle=dark?'#a0ad9a':'#7d8973';ctx.fillText(fmt(metrics.width)+' × '+fmt(metrics.depth)+' × '+fmt(metrics.height)+' cm  ·  '+(state.palette?PRESETS[state.palette].name:'Paletă personalizată'),32,source.height+81);
-    ctx.font='12px Segoe UI';ctx.fillText('Model orientativ după fotografii. Blat '+state.top+' · Fronturi '+state.fronts+' · Corp '+state.body,32,source.height+110);
+    ctx.font='12px Segoe UI';ctx.fillText('Model orientativ. Blat '+state.top+' · Fronturi sus '+state.frontsUpper+' · Fronturi jos '+state.frontsLower+' · Corp '+state.body,32,source.height+110);
     renderer.setPixelRatio(previousRatio);renderer.setSize(previousSize.x,previousSize.y,false);dirty=true;
     canvas.toBlob(blob=>{if(blob){download(blob,'forma-'+state.model+'.png');toast('Imaginea 3D a fost exportată.');}},'image/png');
   });
@@ -2140,7 +2190,8 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   if(FEATURES.photoImport)window.FurniturePhotoUI.init({onGenerated:payload=>{
     const imported=validatePhoto({...payload,initialSize:payload.size});
     const previous=state;
-    state={...state,model:'photo',photo:imported,sizes:{...state.sizes,photo:{...imported.initialSize}},doorsOpen:false,palette:null,...imported.descriptor.colors,bodyFinish:'matte',frontsFinish:'matte',topFinish:'matte'};
+    const appearance=validateAppearance({...imported.descriptor.colors,bodyFinish:'matte',frontsFinish:'matte',topFinish:'matte'},'legacy');
+    state={...state,...appearance,model:'photo',photo:imported,sizes:{...state.sizes,photo:{...imported.initialSize}},doorsOpen:false,palette:null};
     try {rebuild(true);toast('Volumul 3D a fost creat. Poți schimba culorile și dimensiunile.');}
     catch(error){state=previous;throw error;}
   }});

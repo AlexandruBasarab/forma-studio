@@ -7,11 +7,11 @@ const assert = require('node:assert/strict');
 const FILE = path.join(__dirname, 'configurator-mobilier.html');
 const BASE = pathToFileURL(FILE).href;
 const QA = path.join(__dirname, 'qa');
-const ROLES = ['top', 'fronts', 'body'];
+const ROLES = ['top', 'frontsUpper', 'frontsLower', 'body'];
 const FIELDS = [...ROLES, ...ROLES.map(role => role + 'Finish')];
 const appearance = state => Object.fromEntries(FIELDS.map(key => [key, state[key]]));
 const shared = state => ({
-  v: 1, model: state.model, ...appearance(state),
+  v: 2, model: state.model, ...appearance(state),
   sizes: { custom: state.sizes.custom, bar: state.sizes.bar }, worktops: state.worktops,
   extension: state.extension, glass: state.glass, doorsOpen: state.doorsOpen, dimensions: state.dimensions
 });
@@ -24,6 +24,7 @@ const withParam = (param, data, base = BASE) => {
   return url.href;
 };
 const clone = data => JSON.parse(JSON.stringify(data));
+const upgradedAppearance = legacy => ({ top: legacy.top, frontsUpper: legacy.fronts, frontsLower: legacy.fronts, body: legacy.body, topFinish: legacy.topFinish, frontsUpperFinish: legacy.frontsFinish, frontsLowerFinish: legacy.frontsFinish, bodyFinish: legacy.bodyFinish });
 
 (async () => {
   fs.mkdirSync(QA, { recursive: true });
@@ -87,7 +88,7 @@ const clone = data => JSON.parse(JSON.stringify(data));
     }
 
     await page.goto(BASE + '?source=sample%20room&campaign=test#configuration'); await ready(page);
-    const target = { top: '#bb3355', fronts: '#345678', body: '#eeeecc', topFinish: 'stone', frontsFinish: 'wood', bodyFinish: 'matte' };
+    const target = { top: '#bb3355', frontsUpper: '#345678', frontsLower: '#876543', body: '#eeeecc', topFinish: 'stone', frontsUpperFinish: 'wood', frontsLowerFinish: 'matte', bodyFinish: 'matte' };
     for (const role of ROLES) {
       await input(page, '#' + role + 'Hex', target[role]);
       await page.selectOption('#' + role + 'Finish', target[role + 'Finish']);
@@ -182,12 +183,12 @@ const clone = data => JSON.parse(JSON.stringify(data));
     const legacyTarget = { top: '#866247', fronts: '#e7dfd2', body: '#ded6c9', topFinish: 'wood', frontsFinish: 'matte', bodyFinish: 'matte' };
     const beforeLegacy = await state(page), legacyLink = withParam('finisaje', { v: 1, ...legacyTarget });
     await page.goto(legacyLink); await ready(page);
-    assert.deepEqual(appearance(await state(page)), legacyTarget);
+    assert.deepEqual(appearance(await state(page)), upgradedAppearance(legacyTarget));
     assert.deepEqual(remainder(await state(page)), remainder(beforeLegacy));
     assert.equal((await state(page)).palette, 'cashmere');
-    await input(page, '#frontsHex', '#abcdef');
+    await input(page, '#frontsUpperHex', '#abcdef');
     assert.equal(new URL(page.url()).searchParams.has('config'), false);
-    assert.deepEqual(decode(page.url(), 'finisaje'), { v: 1, ...appearance(await state(page)) });
+    assert.deepEqual(decode(page.url(), 'finisaje'), { v: 2, ...appearance(await state(page)) });
     const upgradedLink = await generatedLink(page); await page.click('#closeAppearanceShare');
     assert.equal(new URL(upgradedLink).searchParams.has('finisaje'), false);
     const dualLink = withParam('finisaje', { v: 1, ...legacyTarget }, barLink);
@@ -199,7 +200,9 @@ const clone = data => JSON.parse(JSON.stringify(data));
     const validBefore = await state(page);
     const bad = mutate => { const value = clone(barExpected); mutate(value); return encode(value); };
     const invalid = [
-      ['unknown-version', bad(d => { d.v = 2; })],
+      ['unknown-version', bad(d => { d.v = 3; })],
+      ['missing-upper-front', bad(d => { delete d.frontsUpper; })],
+      ['missing-lower-front-finish', bad(d => { delete d.frontsLowerFinish; })],
       ['missing-model', bad(d => { delete d.model; })],
       ['unsupported-model', bad(d => { d.model = 'photo'; })],
       ['bad-color', bad(d => { d.top = 'red'; })],
@@ -236,7 +239,7 @@ const clone = data => JSON.parse(JSON.stringify(data));
     assert.deepEqual(await state(page), validBefore, 'Duplicate full parameters are ambiguous and rejected');
     await page.goto(withParam('config', 'broken', legacyLink)); await ready(page);
     assert.deepEqual(await state(page), validBefore, 'Invalid full configuration never falls back to the valid legacy palette');
-    for (const token of [encode({ v: 2, ...target }), encode({ v: 1, top: '#112233' }), '%%%broken%%%', 'a'.repeat(1025)]) {
+    for (const token of [encode({ v: 3, ...target }), encode({ v: 1, top: '#112233' }), '%%%broken%%%', 'a'.repeat(1025)]) {
       await page.goto(withParam('finisaje', token)); await ready(page);
       assert.deepEqual(await state(page), validBefore, 'Malformed legacy links remain safely rejected');
     }

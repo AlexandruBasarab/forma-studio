@@ -4,9 +4,9 @@
   const T = window.THREE;
   const FEATURES = {photoImport:true};
   const PRESETS = {
-    oak: { name: 'Stejar & alb cald', top: '#eeeae1', fronts: '#b98c60', body: '#b98c60', topFinish: 'stone', frontsFinish: 'wood', bodyFinish: 'wood' },
-    cashmere: { name: 'Cașmir & nuc', top: '#866247', fronts: '#e7dfd2', body: '#ded6c9', topFinish: 'wood', frontsFinish: 'matte', bodyFinish: 'matte' },
-    sage: { name: 'Salvie & stejar', top: '#c5a277', fronts: '#87927b', body: '#eff0e7', topFinish: 'wood', frontsFinish: 'matte', bodyFinish: 'matte' }
+    oak: { name: 'Stejar & alb cald', top: '#eeeae1', frontsUpper: '#b98c60', frontsLower: '#b98c60', body: '#b98c60', topFinish: 'stone', frontsUpperFinish: 'wood', frontsLowerFinish: 'wood', bodyFinish: 'wood' },
+    cashmere: { name: 'Cașmir & nuc', top: '#866247', frontsUpper: '#e7dfd2', frontsLower: '#e7dfd2', body: '#ded6c9', topFinish: 'wood', frontsUpperFinish: 'matte', frontsLowerFinish: 'matte', bodyFinish: 'matte' },
+    sage: { name: 'Salvie & stejar', top: '#c5a277', frontsUpper: '#87927b', frontsLower: '#87927b', body: '#eff0e7', topFinish: 'wood', frontsUpperFinish: 'matte', frontsLowerFinish: 'matte', bodyFinish: 'matte' }
   };
   const MODELS = {
     custom: { title: 'Dulap vitrină', description: 'Depozitare generoasă. Detalii la vedere.', index: '01', builder: o => window.FurnitureCabinets.buildCustom(o) },
@@ -16,10 +16,12 @@
   const STORAGE = 'forma-furniture-v1';
   const APPEARANCE_PARAM = 'finisaje';
   const CONFIGURATION_PARAM = 'config';
-  const MATERIAL_ROLES = ['top', 'fronts', 'body'];
+  const MATERIAL_ROLES = ['top', 'frontsUpper', 'frontsLower', 'body'];
+  const MATERIAL_FIELDS = MATERIAL_ROLES.flatMap(role => [role, role+'Finish']);
+  const SPLIT_FRONT_FIELDS = ['frontsUpper', 'frontsLower', 'frontsUpperFinish', 'frontsLowerFinish'];
   const FINISH_LABELS = {wood:'Lemn', matte:'Mat', stone:'Piatră'};
   function appearancePayload() {
-    const payload = {v:1};
+    const payload = {v:2};
     for (const role of MATERIAL_ROLES) {
       payload[role] = state[role];
       payload[role+'Finish'] = state[role+'Finish'];
@@ -30,19 +32,27 @@
     if (!token || token.length > maxLength || !/^[A-Za-z0-9_-]+$/.test(token) || token.length % 4 === 1) throw new Error('Link invalid.');
     const json = atob(token.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(token.length/4)*4,'='));
     const data = JSON.parse(json);
-    if (!data || typeof data !== 'object' || Array.isArray(data) || data.v !== 1) throw new Error('Versiune necunoscută.');
+    if (!data || typeof data !== 'object' || Array.isArray(data) || ![1,2].includes(data.v)) throw new Error('Versiune necunoscută.');
     return data;
+  }
+  function validateAppearance(data, layout = 'auto') {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Culori sau finisaje invalide.');
+    // Older projects have one front material. A partially supplied new layout
+    // must fail validation instead of silently losing one of its front colors.
+    const legacy = layout === 'legacy' || (layout === 'auto' && !SPLIT_FRONT_FIELDS.some(key => Object.hasOwn(data,key)));
+    const appearance = {};
+    for (const role of MATERIAL_ROLES) {
+      const source = legacy && (role === 'frontsUpper' || role === 'frontsLower') ? 'fronts' : role;
+      if (typeof data[source] !== 'string' || !/^#[0-9a-f]{6}$/i.test(data[source]) || typeof data[source+'Finish'] !== 'string' || !Object.hasOwn(FINISH_LABELS,data[source+'Finish'])) throw new Error('Culoare sau finisaj invalid.');
+      appearance[role] = data[source].toLowerCase();
+      appearance[role+'Finish'] = data[source+'Finish'];
+    }
+    return appearance;
   }
   function decodeAppearance(token) {
     const data = decodeSharedData(token,1024);
-    const appearance = {};
-    // Copy only validated material fields; a shared palette cannot replace the project.
-    for (const role of MATERIAL_ROLES) {
-      if (typeof data[role] !== 'string' || !/^#[0-9a-f]{6}$/i.test(data[role]) || typeof data[role+'Finish'] !== 'string' || !Object.hasOwn(FINISH_LABELS,data[role+'Finish'])) throw new Error('Culoare sau finisaj invalid.');
-      appearance[role] = data[role].toLowerCase();
-      appearance[role+'Finish'] = data[role+'Finish'];
-    }
-    return appearance;
+    // Copy only material fields; a shared palette cannot replace the project.
+    return validateAppearance(data,data.v===1?'legacy':'split');
   }
   function configurationPayload() {
     return {
@@ -60,7 +70,7 @@
     if (!data.sizes || typeof data.sizes !== 'object' || Array.isArray(data.sizes) || !data.sizes.custom || !data.sizes.bar || !data.worktops || typeof data.worktops !== 'object' || Array.isArray(data.worktops)) throw new Error('Lipsesc dimensiunile sau blaturile.');
     // Reuse project validation, requiring every shared dimension and top setting.
     // Photo data is local-only and never accepted from a compact configuration link.
-    return validate({...data,photo:null,sizes:{custom:data.sizes.custom,bar:data.sizes.bar}});
+    return validate({...data,...validateAppearance(data,data.v===1?'legacy':'split'),photo:null,sizes:{custom:data.sizes.custom,bar:data.sizes.bar}},'split');
   }
   function shareUrl(mode = shareLinkMode || 'configuration') {
     const url = new URL(window.location.href);
@@ -131,19 +141,13 @@
     }
     return next;
   }
-  function validate(data) {
+  function validate(data, appearanceLayout = 'auto') {
     if (!data || typeof data !== 'object' || !Object.hasOwn(MODELS, data.model)) throw new Error('Proiectul nu conține un model compatibil.');
     const result = defaults();
     result.model = data.model;
     if(data.photo!=null)result.photo=validatePhoto(data.photo);
     if(data.model==='photo'&&!result.photo)throw new Error('Proiectul nu conține modelul generat din fotografie.');
-    for (const key of ['top', 'fronts', 'body']) {
-      if (typeof data[key] !== 'string' || !/^#[0-9a-f]{6}$/i.test(data[key])) throw new Error('Proiectul conține un cod de culoare invalid.');
-      result[key] = data[key].toLowerCase();
-      const finish = data[key + 'Finish'];
-      if (!['wood', 'matte', 'stone'].includes(finish)) throw new Error('Finisaj necunoscut.');
-      result[key + 'Finish'] = finish;
-    }
+    Object.assign(result,validateAppearance(data,appearanceLayout));
     if (typeof data.extension !== 'number' || !Number.isFinite(data.extension) || data.extension < 0 || data.extension > 1) throw new Error('Extensia trebuie să fie între 0 și 1.');
     result.extension = data.extension;
     for (const key of ['glass', 'doorsOpen', 'dimensions']) result[key] = data[key] === true;
@@ -187,7 +191,7 @@
     return {descriptor,thumbnail:value.thumbnail,name:typeof value.name==='string'?value.name.replace(/[\x00-\x1f]/g,'').slice(0,80):'Obiect importat',initialSize};
   }
   function matchedPalette(data) {
-    return Object.keys(PRESETS).find(key => ['top', 'fronts', 'body', 'topFinish', 'frontsFinish', 'bodyFinish'].every(prop => data[prop] === PRESETS[key][prop])) || null;
+    return Object.keys(PRESETS).find(key => MATERIAL_FIELDS.every(prop => data[prop] === PRESETS[key][prop])) || null;
   }
   let state = defaults();
   let storageAvailable = true;
@@ -395,7 +399,7 @@
     syncPhotoCard();
     document.querySelectorAll('[data-model]').forEach(button => { const active = button.dataset.model === state.model; button.classList.toggle('active', active); button.setAttribute('aria-pressed', active); });
     document.querySelectorAll('[data-palette]').forEach(button => { const active = button.dataset.palette === state.palette; button.classList.toggle('active', active); button.setAttribute('aria-pressed', active); });
-    for (const role of ['top','fronts','body']) {
+    for (const role of MATERIAL_ROLES) {
       $(role+'Color').value = state[role]; $(role+'Finish').value = state[role+'Finish'];
       // A queued model rebuild must not discard a HEX value that is still being typed.
       if(document.activeElement!==$(role+'Hex'))$(role+'Hex').value = state[role].toUpperCase();
@@ -512,7 +516,7 @@
   });
   document.querySelector('.model-grid').addEventListener('click',event=>{const button=event.target.closest('[data-model]');if(!button||state.model===button.dataset.model)return;const next=button.dataset.model;if(!Object.hasOwn(MODELS,next)||(next==='photo'&&!state.photo))return;state.model=next;state.doorsOpen=false;rebuild(true);});
   document.querySelectorAll('[data-palette]').forEach(button => button.addEventListener('click', () => { const key=button.dataset.palette; Object.assign(state, PRESETS[key], {palette:key}); syncControls(); scheduleRebuild(); }));
-  for(const role of ['top','fronts','body']) {
+  for(const role of MATERIAL_ROLES) {
     $(role+'Color').addEventListener('input', event => {state[role]=event.target.value;state.palette=matchedPalette(state);syncControls();scheduleRebuild();});
     $(role+'Hex').addEventListener('change', event => {
       let value=event.target.value.trim(); if(!value.startsWith('#'))value='#'+value;
@@ -562,7 +566,7 @@
   $('zoomIn').addEventListener('click', () => zoom(.86)); $('zoomOut').addEventListener('click', () => zoom(1.16)); $('fitBtn').addEventListener('click', () => fit(true));
   $('resetBtn').addEventListener('click', () => {const current=state.model,sizes=state.sizes,photo=state.photo,worktops=state.worktops;state=defaults();state.model=current;state.sizes=sizes;state.photo=photo;state.worktops=worktops;state.sizes[current]=originalSize(current);resetModelWorktops();rebuild(true);toast('Configurația modelului a fost resetată.');});
   function download(blob,name) { const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000); }
-  $('saveBtn').addEventListener('click', () => {const project={format:'forma-furniture',version:4,savedAt:new Date().toISOString(),configuration:state};download(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),'forma-'+state.model+'.json');toast('Proiect salvat. Îl poți redeschide în acest configurator.');});
+  $('saveBtn').addEventListener('click', () => {const project={format:'forma-furniture',version:5,savedAt:new Date().toISOString(),configuration:state};download(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),'forma-'+state.model+'.json');toast('Proiect salvat. Îl poți redeschide în acest configurator.');});
   $('shareAppearanceBtn').addEventListener('click', () => {
     if(state.model==='photo') {
       toast('Pentru a partaja mobilierul din fotografie, folosește „Salvează proiect” și trimite fișierul JSON.');
@@ -589,7 +593,7 @@
   $('importBtn').addEventListener('click', () => $('projectFile').click());
   $('projectFile').addEventListener('change', async event => {
     const file=event.target.files[0];if(!file)return;
-    try {if(file.size>500000)throw new Error('Fișierul este prea mare pentru un proiect.');const data=JSON.parse(await file.text());if(data.format!=='forma-furniture'||![1,2,3,4].includes(data.version))throw new Error('Alege un proiect JSON salvat din FORMĂ.');state=validate(data.configuration);rebuild(true);toast('Proiectul a fost încărcat.');}
+    try {if(file.size>500000)throw new Error('Fișierul este prea mare pentru un proiect.');const data=JSON.parse(await file.text());if(data.format!=='forma-furniture'||![1,2,3,4,5].includes(data.version))throw new Error('Alege un proiect JSON salvat din FORMĂ.');state=validate(data.configuration,data.version===5?'split':'auto');rebuild(true);toast('Proiectul a fost încărcat.');}
     catch(error){toast(error.message||'Proiectul nu a putut fi încărcat.');}
     event.target.value='';
   });
@@ -604,7 +608,7 @@
     const ctx=canvas.getContext('2d');ctx.fillStyle=dark?'#151d18':'#f4f4ee';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,0,0);
     ctx.fillStyle=dark?'#e4eadf':'#3f5137';ctx.font='30px Georgia';ctx.fillText('FORMĂ / '+MODELS[state.model].title,32,source.height+47);
     ctx.font='17px Segoe UI';ctx.fillStyle=dark?'#a0ad9a':'#7d8973';ctx.fillText(fmt(metrics.width)+' × '+fmt(metrics.depth)+' × '+fmt(metrics.height)+' cm  ·  '+(state.palette?PRESETS[state.palette].name:'Paletă personalizată'),32,source.height+81);
-    ctx.font='12px Segoe UI';ctx.fillText('Model orientativ după fotografii. Blat '+state.top+' · Fronturi '+state.fronts+' · Corp '+state.body,32,source.height+110);
+    ctx.font='12px Segoe UI';ctx.fillText('Model orientativ. Blat '+state.top+' · Fronturi sus '+state.frontsUpper+' · Fronturi jos '+state.frontsLower+' · Corp '+state.body,32,source.height+110);
     renderer.setPixelRatio(previousRatio);renderer.setSize(previousSize.x,previousSize.y,false);dirty=true;
     canvas.toBlob(blob=>{if(blob){download(blob,'forma-'+state.model+'.png');toast('Imaginea 3D a fost exportată.');}},'image/png');
   });
@@ -616,7 +620,8 @@
   if(FEATURES.photoImport)window.FurniturePhotoUI.init({onGenerated:payload=>{
     const imported=validatePhoto({...payload,initialSize:payload.size});
     const previous=state;
-    state={...state,model:'photo',photo:imported,sizes:{...state.sizes,photo:{...imported.initialSize}},doorsOpen:false,palette:null,...imported.descriptor.colors,bodyFinish:'matte',frontsFinish:'matte',topFinish:'matte'};
+    const appearance=validateAppearance({...imported.descriptor.colors,bodyFinish:'matte',frontsFinish:'matte',topFinish:'matte'},'legacy');
+    state={...state,...appearance,model:'photo',photo:imported,sizes:{...state.sizes,photo:{...imported.initialSize}},doorsOpen:false,palette:null};
     try {rebuild(true);toast('Volumul 3D a fost creat. Poți schimba culorile și dimensiunile.');}
     catch(error){state=previous;throw error;}
   }});

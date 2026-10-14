@@ -154,14 +154,14 @@ const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(
     const projectPath = path.join(qaDir, 'dimensions-project-v2.json');
     await save.saveAs(projectPath);
     const saved = JSON.parse(fs.readFileSync(projectPath, 'utf8'));
-    assert.equal(saved.version, 4);
+    assert.equal(saved.version, 5);
     assert.deepEqual(saved.configuration.sizes, { custom: CUSTOM, bar: BAR,photo:DEFAULT_SIZES.photo });
 
     await page.click('#resetDimensions');
     let reset = await state();
     assert.deepEqual(reset.sizes.bar, DEFAULT_SIZES.bar, 'Dimension reset restores only the active object');
     assert.deepEqual(reset.sizes.custom, CUSTOM, 'Dimension reset preserves the other object');
-    for (const key of ['top', 'fronts', 'body', 'topFinish', 'frontsFinish', 'bodyFinish']) {
+    for (const key of ['top', 'frontsUpper', 'frontsLower', 'body', 'topFinish', 'frontsUpperFinish', 'frontsLowerFinish', 'bodyFinish']) {
       assert.equal(reset[key], savedConfiguration[key], `Dimension reset preserves ${key}`);
     }
     await page.click('[data-palette="cashmere"]');

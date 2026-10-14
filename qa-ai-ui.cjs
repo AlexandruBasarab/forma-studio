@@ -120,6 +120,8 @@ const descriptor = {
     let current = await state(page);
     assert.equal(current.photo.descriptor.version, 2); assert.equal(current.photo.name, descriptor.name);
     assert.deepEqual(current.sizes.photo, descriptor.size);
+    assert.equal(current.frontsUpper, descriptor.colors.fronts);
+    assert.equal(current.frontsLower, descriptor.colors.fronts, 'AI output seeds both editable front zones from its single suggested color');
     const geometry = await page.evaluate(() => {
       const group = FormaConfigurator.getScene().getObjectByName('photo'), roles = [];
       group.updateMatrixWorld(true); group.traverse(mesh => { if (mesh.isMesh) roles.push(mesh.userData.role); });
@@ -127,7 +129,7 @@ const descriptor = {
       return { technique: group.userData.technique, roles, hole };
     });
     assert.equal(geometry.technique, 'ai-parts'); assert.equal(geometry.roles.length, descriptor.parts.length); assert.equal(geometry.hole, 0);
-    for (const [role, hex, finish] of [['body', '#246853', 'wood'], ['fronts', '#563294', 'matte'], ['top', '#b32d45', 'stone']]) {
+    for (const [role, hex, finish] of [['body', '#246853', 'wood'], ['frontsUpper', '#563294', 'matte'], ['top', '#b32d45', 'stone']]) {
       await page.fill('#' + role + 'Hex', hex); await page.locator('#' + role + 'Hex').press('Tab');
       await page.selectOption('#' + role + 'Finish', finish); await settle(page);
       const material = await page.evaluate(r => {
@@ -135,6 +137,8 @@ const descriptor = {
       }, role);
       assert(material.length && material.every(item => item.color === hex.slice(1) && item.texture === (finish !== 'matte')));
     }
+    await page.fill('#frontsLowerHex', '#2a7564'); await page.locator('#frontsLowerHex').press('Tab');
+    await page.selectOption('#frontsLowerFinish', 'wood'); await settle(page);
     const dimensions = { width: 185, height: 92, depth: 75 };
     for (const [key, value] of Object.entries(dimensions)) { await page.fill('#size-' + key, String(value)); await page.locator('#size-' + key).press('Tab'); await settle(page); }
     const measured = await page.evaluate(() => {

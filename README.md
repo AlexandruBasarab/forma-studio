@@ -5,8 +5,8 @@ Configurator 3D de mobilier pentru explorarea culorilor, finisajelor și dimensi
 ## Funcționalități
 
 - Două modele parametrice: dulap vitrină și bar cu masă extensibilă.
-- Trei palete presetate și culori independente pentru blat, fronturi și carcasă.
-- Finisaje lemn, mat și piatră.
+- Trei palete presetate și culori independente pentru blat, fronturile de sus, fronturile de jos și carcasă.
+- Finisaje lemn, mat și piatră, alese separat pentru fiecare zonă.
 - Dimensiuni editabile pentru corpuri și compartimentare.
 - Lățime, adâncime și poziție independente pentru fiecare blat, inclusiv depășiri față de corp.
 - Rotire 3D, zoom, vederi prestabilite, cote și deschiderea ușilor.
@@ -41,11 +41,13 @@ Editează fișierele din `src/`, apoi rulează din nou build-ul. Nu edita direct
 
 Comutatorul soare/lună din antet schimbă tema interfeței. Această preferință este separată de proiect și de linkurile partajate; culorile mobilierului rămân cele alese în configurator. Fundalul exportului PNG urmează tema curentă.
 
+Controalele **Fronturi / Uși — Sus** și **Fronturi / Uși — Jos** colorează separat ușile superioare și inferioare ale dulapului. La bar, zona de sus este sertarul, iar zona de jos cuprinde ușile, pe ambele fețe. La modelele AI, fronturile sunt grupate după înălțime. Alegerea unei palete presetate aplică aceeași culoare și același finisaj ambelor zone, care pot fi apoi modificate independent.
+
 ## Publicare
 
 ### Cloudflare Workers cu generare AI
 
-Configurația `wrangler.jsonc` publică un Worker separat, **forma-studio-ai**, cu fișierele din `dist` și endpointurile `/api/ai/*`. Pentru branch-ul acestei funcții, selectează `codex/external-ai-furniture` în integrarea Git Cloudflare:
+Configurația `wrangler.jsonc` publică un Worker separat, **forma-studio-ai**, cu fișierele din `dist` și endpointurile `/api/ai/*`. Funcția AI este inclusă în `main`; selectează acest branch în integrarea Git Cloudflare:
 
 - Build command: `npm run build`
 - Deploy command: `npx wrangler deploy`
@@ -54,7 +56,7 @@ Configurația `wrangler.jsonc` publică un Worker separat, **forma-studio-ai**, 
 
 Poți adăuga secretul și din terminal cu `npx wrangler secret put AI_SESSION_SECRET`; valoarea se introduce interactiv. Nu adăuga cheile personale ale furnizorilor în setările publice de build. Generarea rămâne indisponibilă până când secretul de sesiune este configurat. Deploy-ul necesită autentificare Cloudflare și o versiune Node acceptată de Wrangler; folosește Node.js 22 sau mai nou pentru deploy.
 
-Acest branch nu modifică automat Worker-ul de producție `forma-studio`. Pentru un preview din dashboard, păstrează numele separat și configurează secretul și în mediul respectiv. Git push publică sursele; deploy-ul este un pas distinct.
+Configurația păstrează numele separat și nu modifică automat Worker-ul de producție `forma-studio`. Pentru un preview din dashboard, configurează secretul și în mediul respectiv. Git push publică sursele; deploy-ul este un pas distinct.
 
 ### Găzduire statică
 
@@ -78,12 +80,14 @@ Poți încărca numai `dist` pe orice serviciu static (inclusiv Netlify, folosin
 
 ```json
 {
-  "v": 1,
+  "v": 2,
   "model": "custom",
   "top": "#c5a277",
   "topFinish": "wood",
-  "fronts": "#87927b",
-  "frontsFinish": "matte",
+  "frontsUpper": "#87927b",
+  "frontsUpperFinish": "matte",
+  "frontsLower": "#87927b",
+  "frontsLowerFinish": "matte",
   "body": "#eff0e7",
   "bodyFinish": "matte",
   "sizes": {
@@ -110,7 +114,9 @@ Poți încărca numai `dist` pe orice serviciu static (inclusiv Netlify, folosin
 
 La deschidere, linkul restabilește modelul selectat (`custom` sau `bar`), dimensiunile ambelor modele, cele trei blaturi și opțiunile de afișare, împreună cu toate culorile și finisajele. Dimensiunile și deplasările sunt în centimetri. `widthDelta` și `depthDelta` reprezintă ajustările față de dimensiunea implicită a blatului, astfel încât depășirile se păstrează când corpul sau extensia mesei se modifică. `offsetX` mută blatul spre dreapta pentru valori pozitive, iar `offsetZ` spre față. `extension` este între `0` (retrasă) și `1` (extinsă).
 
-Parametrii invalizi sunt respinși. După partajare, modificările configurației actualizează și adresa paginii. Linkurile vechi cu parametrul `finisaje` rămân compatibile și aplică numai cele șase câmpuri de culori și finisaje, păstrând modelul și dimensiunile destinatarului.
+Parametrii invalizi sunt respinși. După partajare, modificările configurației actualizează și adresa paginii. Formatul `config` v2 include opt câmpuri pentru culori și finisaje, cu `frontsUpper` / `frontsUpperFinish` și `frontsLower` / `frontsLowerFinish` independente. Linkurile vechi `config` v1 și cele cu parametrul `finisaje` rămân compatibile: culoarea și finisajul unice pentru fronturi se aplică ambelor zone. Linkurile `finisaje` păstrează modelul și dimensiunile destinatarului.
+
+Proiectele JSON exportate folosesc versiunea 5 și păstrează separat culorile și finisajele celor două zone. Proiectele mai vechi sunt importate cu aceeași culoare și același finisaj pe fronturile de sus și de jos. Contractul AI rămâne la versiunea 2, cu `colors.fronts` unic; la generare, acea culoare inițializează ambele zone editabile.
 
 Partajarea prin link este disponibilă pentru cele două modele predefinite. Pentru un model generat din fotografie, folosește **Salvează proiectul** și importul fișierului JSON: acesta conține geometria, miniatura, culorile, finisajele și dimensiunile, fără credențiale AI. Destinatarul poate deschide și edita proiectul fără conectare la AI.
 

@@ -21,12 +21,12 @@ const assert = require('node:assert/strict');
     const result=await page.evaluate(()=>({state:FormaConfigurator.getState(),colors:[...new Set(FormaConfigurator.getScene().getObjectByName(FormaConfigurator.getState().model).children.flatMap(x=>x.material?.color?[x.material.color.getHexString()]:[]))]}));
     assert.equal(result.state.palette,preset);
   }
-  for(const [role,value] of [['top','#bb3355'],['fronts','#345678'],['body','#eeeecc']]){
+  for(const [role,value] of [['top','#bb3355'],['frontsUpper','#345678'],['frontsLower','#876543'],['body','#eeeecc']]){
     await page.fill('#'+role+'Hex',value);await page.locator('#'+role+'Hex').press('Tab');
     await page.waitForFunction(([r,v])=>FormaConfigurator.getState()[r]===v,[role,value]);
   }
   let state=await page.evaluate(()=>FormaConfigurator.getState());
-  assert.equal(state.top,'#bb3355');assert.equal(state.fronts,'#345678');assert.equal(state.body,'#eeeecc');assert.equal(state.palette,null);
+  assert.equal(state.top,'#bb3355');assert.equal(state.frontsUpper,'#345678');assert.equal(state.frontsLower,'#876543');assert.equal(state.body,'#eeeecc');assert.equal(state.palette,null);
   await page.click('[data-palette="sage"]');
   await page.check('#doorsOpen');await page.click('#dimensionsBtn');
   await page.screenshot({path:path.join(__dirname,'qa/cabinet-open.png')});

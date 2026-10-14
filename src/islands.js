@@ -54,6 +54,10 @@
 
   function context(options) {
     const o = Object.assign({ body: '#e6e5de', fronts: '#ecece7', top: '#d5b685', hardware: '#666963', bodyFinish: 'matte', frontsFinish: 'matte', topFinish: 'wood', extension: 1, doorsOpen: false, edgeDetails: true }, options || {});
+    for (const role of ['frontsUpper', 'frontsLower']) {
+      o[role] = o[role] || o.fronts;
+      o[role + 'Finish'] = o[role + 'Finish'] || o.frontsFinish;
+    }
     o.extension = Math.max(0, Math.min(1, Number(o.extension) || 0));
     const finishMaterial = (color, finish) => new T.MeshStandardMaterial({
       color, map: finish === 'wood' ? woodTexture() : finish === 'stone' ? stoneTexture() : null,
@@ -61,16 +65,22 @@
     });
     const mat = {
       body: finishMaterial(o.body, o.bodyFinish),
-      front: finishMaterial(o.fronts, o.frontsFinish),
+      frontsUpper: finishMaterial(o.frontsUpper, o.frontsUpperFinish),
+      frontsLower: finishMaterial(o.frontsLower, o.frontsLowerFinish),
       top: finishMaterial(o.top, o.topFinish),
       metal: new T.MeshStandardMaterial({ color: o.hardware, metalness: 0.72, roughness: 0.27 }),
       dark: new T.MeshStandardMaterial({ color: '#252724', roughness: 0.8 }),
       drawer: new T.MeshStandardMaterial({ color: '#cfbd9f', roughness: 0.78 }),
       slot: new T.MeshStandardMaterial({ color: '#393c36', roughness: 0.9 }),
     };
+    for (const role of ['body', 'frontsUpper', 'frontsLower', 'top']) {
+      mat[role].name = 'island-material-' + role;
+      mat[role].userData = { role, finish: o[role + 'Finish'] };
+    }
     const edges = new T.LineBasicMaterial({ color: new T.Color(o.body).multiplyScalar(0.52), transparent: true, opacity: 0.22 });
     function box(parent, w, h, d, x, y, z, material = mat.body, outline = false) {
       const mesh = new T.Mesh(new T.BoxGeometry(w, h, d), material);
+      if (material.userData.role) mesh.userData.role = material.userData.role;
       mesh.position.set(x, y, z); mesh.castShadow = true; mesh.receiveShadow = true;
       parent.add(mesh);
       if (outline && o.edgeDetails) {
@@ -92,17 +102,17 @@
       sphere.scale.z = 0.68; sphere.position.set(x, y, z + face * 1.25); sphere.castShadow = true; parent.add(sphere);
       cylinder(parent, 0.83, 0.16, x, y, z, mat.metal);
     }
-    function panel(parent, width, height, x, y, z, face = 1) {
+    function panel(parent, width, height, x, y, z, face = 1, role = 'frontsLower') {
       const group = new T.Group(); group.position.set(x, y, z); parent.add(group);
-      box(group, width, height, 1.5, 0, 0, 0, mat.front, true);
+      box(group, width, height, 1.5, 0, 0, 0, mat[role], true);
       const frame = Math.min(3.2, width * 0.14, height * 0.16);
       const frontZ = face * 1.04;
-      box(group, frame, height, 0.7, -width / 2 + frame / 2, 0, frontZ, mat.front, true);
-      box(group, frame, height, 0.7, width / 2 - frame / 2, 0, frontZ, mat.front, true);
-      box(group, width - frame * 2, frame, 0.7, 0, height / 2 - frame / 2, frontZ, mat.front, true);
-      box(group, width - frame * 2, frame, 0.7, 0, -height / 2 + frame / 2, frontZ, mat.front, true);
+      box(group, frame, height, 0.7, -width / 2 + frame / 2, 0, frontZ, mat[role], true);
+      box(group, frame, height, 0.7, width / 2 - frame / 2, 0, frontZ, mat[role], true);
+      box(group, width - frame * 2, frame, 0.7, 0, height / 2 - frame / 2, frontZ, mat[role], true);
+      box(group, width - frame * 2, frame, 0.7, 0, -height / 2 + frame / 2, frontZ, mat[role], true);
       if (o.edgeDetails && width > 15 && height > 15) {
-        const lineColor = new T.Color(o.fronts).multiplyScalar(0.68);
+        const lineColor = new T.Color(o[role]).multiplyScalar(0.68);
         const inner = new T.LineBasicMaterial({ color: lineColor, transparent: true, opacity: 0.25 });
         const iw = width / 2 - frame - 0.4, ih = height / 2 - frame - 0.4;
         const points = [[-iw, -ih], [iw, -ih], [iw, ih], [-iw, ih], [-iw, -ih]].map(([xx, yy]) => new T.Vector3(xx, yy, face * 0.79));
@@ -122,7 +132,7 @@
       return pivot;
     }
     function drawer(parent, width, height, depth, x, y, z, face = 1, twoKnobs = false) {
-      panel(parent, width, height, x, y, z, face);
+      panel(parent, width, height, x, y, z, face, 'frontsUpper');
       if (twoKnobs) { knob(parent, x - width * 0.28, y, z + face * 1.48, face); knob(parent, x + width * 0.28, y, z + face * 1.48, face); }
       else knob(parent, x, y, z + face * 1.48, face);
       box(parent, width - 3, 0.8, depth, x, y - height / 2 + 1.4, z - face * (depth / 2 + 1), mat.drawer);

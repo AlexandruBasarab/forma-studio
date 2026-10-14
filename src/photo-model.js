@@ -11,6 +11,16 @@
   const finite = value => typeof value === 'number' && Number.isFinite(value);
   const validColor = value => typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
 
+  function appearance(options, photo, role) {
+    const sourceRole = role === 'frontsUpper' || role === 'frontsLower' ? 'fronts' : role;
+    const selectedFinish = options[role + 'Finish'] || options[sourceRole + 'Finish'];
+    return {
+      color: validColor(options[role]) ? options[role] : validColor(options[sourceRole]) ? options[sourceRole]
+        : photo.colors[sourceRole] || DEFAULT_COLORS[sourceRole],
+      finish: ['matte', 'wood', 'stone'].includes(selectedFinish) ? selectedFinish : 'matte'
+    };
+  }
+
   function validateDescriptor(value) {
     if (isRecord(value) && value.version === 2) {
       if (!globalThis.FurnitureAI) throw new Error('Validatorul pentru modelele AI nu este disponibil.');
@@ -131,10 +141,12 @@
     const grooveDepth = Math.min(0.75, size.depth * 0.04);
     const makeBands = (lines, length) => lines.map(n => [Math.max(0, n - grooveWidth / length / 2), Math.min(1, n + grooveWidth / length / 2)]);
     const xBands = makeBands(dividers.vertical, size.width), yBands = makeBands(dividers.horizontal, size.height);
-    const edges = (count, bands) => Array.from(new Set([
-      ...Array.from({ length: count + 1 }, (_, i) => i / count), ...bands.flat()
+    const edges = (count, bands, extra = []) => Array.from(new Set([
+      ...Array.from({ length: count + 1 }, (_, i) => i / count), ...bands.flat(), ...extra
     ])).sort((a, b) => a - b);
-    const xEdges = edges(originalColumns, xBands), yEdges = edges(originalRows, yBands);
+    // Retain the closed silhouette while separating front materials at mid-height,
+    // including grids with an odd number of rows or a single occupied row.
+    const xEdges = edges(originalColumns, xBands), yEdges = edges(originalRows, yBands, [0.5]);
     const columns = xEdges.length - 1, rows = yEdges.length - 1;
     const mask = new Uint8Array(columns * rows);
     let volumeCm3 = 0;
@@ -153,7 +165,8 @@
     const atY = y => size.height - yEdges[y] * size.height;
     const rear = -size.depth / 2, front = size.depth / 2;
     const frontAt = kind => kind === 0 ? rear : kind === 2 ? front - grooveDepth : front;
-    const surfaces = Object.fromEntries(['body', 'fronts', 'top'].map(role => [role, { positions: [], normals: [], uvs: [], indices: [] }]));
+    const frontRole = row => yEdges[row] < 0.5 ? 'frontsUpper' : 'frontsLower';
+    const surfaces = Object.fromEntries(['body', 'frontsUpper', 'frontsLower', 'top'].map(role => [role, { positions: [], normals: [], uvs: [], indices: [] }]));
     let rectangleCount = 0, boundaryCount = 0;
 
     function quad(role, vertices, normal) {
@@ -178,6 +191,7 @@
       while (col + width < columns && kindAt(col + width, row) === kind && !visited[row * columns + col + width]) width++;
       let extend = true;
       while (row + height < rows && extend) {
+        if (kind !== 2 && frontRole(row + height) !== frontRole(row)) break;
         for (let dx = 0; dx < width; dx++) {
           if (kindAt(col + dx, row + height) !== kind || visited[(row + height) * columns + col + dx]) { extend = false; break; }
         }
@@ -185,7 +199,7 @@
       }
       for (let dy = 0; dy < height; dy++) for (let dx = 0; dx < width; dx++) visited[(row + dy) * columns + col + dx] = 1;
       const left = atX(col), right = atX(col + width), top = atY(row), bottom = atY(row + height);
-      quad(kind === 2 ? 'body' : 'fronts', [[left, bottom, surfaceZ], [right, bottom, surfaceZ], [right, top, surfaceZ], [left, top, surfaceZ]], [0, 0, 1]);
+      quad(kind === 2 ? 'body' : frontRole(row), [[left, bottom, surfaceZ], [right, bottom, surfaceZ], [right, top, surfaceZ], [left, top, surfaceZ]], [0, 0, 1]);
       quad('body', [[right, bottom, rear], [left, bottom, rear], [left, top, rear], [right, top, rear]], [0, 0, -1]);
       rectangleCount++;
     }
@@ -229,22 +243,24 @@
       volumeCm3,
       note: 'Volum aproximativ extrudat din siluetă; adâncimea este aleasă de utilizator, iar construcția ascunsă nu este dedusă.'
     };
-    for (const role of ['body', 'fronts', 'top']) {
+    for (const role of ['body', 'frontsUpper', 'frontsLower', 'top']) {
+      if (!surfaces[role].positions.length) continue;
       const data = surfaces[role], geometry = new T.BufferGeometry();
       geometry.setAttribute('position', new T.Float32BufferAttribute(data.positions, 3));
       geometry.setAttribute('normal', new T.Float32BufferAttribute(data.normals, 3));
       geometry.setAttribute('uv', new T.Float32BufferAttribute(data.uvs, 2));
       geometry.setIndex(data.indices);
       geometry.computeBoundingBox(); geometry.computeBoundingSphere();
-      const finish = ['matte', 'wood', 'stone'].includes(o[role + 'Finish']) ? o[role + 'Finish'] : 'matte';
+      const { color, finish } = appearance(o, photo, role);
       const params = {
-        color: validColor(o[role]) ? o[role] : (photo.colors[role] || DEFAULT_COLORS[role]),
+        color,
         roughness: finish === 'stone' ? 0.4 : 0.64, metalness: 0.02
       };
       const map = finishTexture(T, finish);
       if (map) params.map = map;
       const material = new T.MeshStandardMaterial(params);
       material.name = 'photo-material-' + role;
+      material.userData = { role, finish };
       const mesh = new T.Mesh(geometry, material);
       mesh.name = 'photo-' + role;
       mesh.userData.role = role;
@@ -264,24 +280,10 @@
     }
     const group = new T.Group(), parts = new T.Group();
     group.name = 'photo'; parts.name = 'photo-parts'; group.add(parts);
-    const materials = new Map(), roleCounts = {};
-    for (const part of photo.parts) {
-      const role = part.role;
-      let material = materials.get(role);
-      if (!material) {
-        const hardware = role === 'hardware';
-        const finish = !hardware && ['matte', 'wood', 'stone'].includes(options[role + 'Finish']) ? options[role + 'Finish'] : 'matte';
-        const params = {
-          color: validColor(options[role]) ? options[role] : (hardware ? '#4d5148' : photo.colors[role]),
-          roughness: hardware ? 0.32 : finish === 'stone' ? 0.4 : 0.64,
-          metalness: hardware ? 0.72 : 0.02
-        };
-        const map = finishTexture(T, finish);
-        if (map) params.map = map;
-        material = new T.MeshStandardMaterial(params);
-        material.name = 'photo-material-' + role;
-        materials.set(role, material);
-      }
+    // Use the actual rotated geometry to locate the object's vertical midpoint.
+    // Assign each complete front part to one zone, preserving doors as single pieces.
+    const bounds = new T.Box3();
+    const preparedParts = photo.parts.map(part => {
       const dimensions = [part.size.x * photo.size.width, part.size.y * photo.size.height, part.size.z * photo.size.depth];
       const geometry = part.shape === 'cylinder'
         ? new T.CylinderGeometry(0.5, 0.5, 1, 24, 1, false)
@@ -291,19 +293,43 @@
       const rotation = new T.Euler(...['x', 'y', 'z'].map(axis => T.MathUtils.degToRad(part.rotation[axis])));
       geometry.applyMatrix4(new T.Matrix4().makeRotationFromEuler(rotation));
       geometry.translate(part.position.x * photo.size.width, part.position.y * photo.size.height, part.position.z * photo.size.depth);
+      geometry.computeBoundingBox();
+      bounds.union(geometry.boundingBox);
+      return { part, geometry };
+    });
+    const extent = bounds.getSize(new T.Vector3());
+    const center = bounds.getCenter(new T.Vector3());
+    const materials = new Map(), roleCounts = {};
+    for (const { part, geometry } of preparedParts) {
+      const partCenterY = (geometry.boundingBox.min.y + geometry.boundingBox.max.y) / 2;
+      const role = part.role === 'fronts' ? partCenterY >= center.y ? 'frontsUpper' : 'frontsLower' : part.role;
+      let material = materials.get(role);
+      if (!material) {
+        const hardware = role === 'hardware';
+        const { color, finish } = hardware ? { color: validColor(options.hardware) ? options.hardware : '#4d5148', finish: 'matte' }
+          : appearance(options, photo, role);
+        const params = {
+          color,
+          roughness: hardware ? 0.32 : finish === 'stone' ? 0.4 : 0.64,
+          metalness: hardware ? 0.72 : 0.02
+        };
+        const map = finishTexture(T, finish);
+        if (map) params.map = map;
+        material = new T.MeshStandardMaterial(params);
+        material.name = 'photo-material-' + role;
+        material.userData = { role, finish };
+        materials.set(role, material);
+      }
       const mesh = new T.Mesh(geometry, material);
       roleCounts[role] = (roleCounts[role] || 0) + 1;
       mesh.name = 'photo-' + role + (roleCounts[role] > 1 ? '-' + roleCounts[role] : '');
-      mesh.userData = { role, partName: part.name, shape: part.shape };
+      mesh.userData = { role, sourceRole: part.role, partName: part.name, shape: part.shape,
+        ...(part.role === 'fronts' ? { frontZone: role === 'frontsUpper' ? 'upper' : 'lower' } : {}) };
       mesh.castShadow = true; mesh.receiveShadow = true;
       parts.add(mesh);
     }
     // AI coordinates may include overhangs or rotated parts. Fit actual geometry,
     // so the user's dimensions describe the entire object, not an assumed box.
-    parts.updateMatrixWorld(true);
-    const bounds = new T.Box3().setFromObject(parts, true);
-    const extent = bounds.getSize(new T.Vector3());
-    const center = bounds.getCenter(new T.Vector3());
     parts.position.set(-center.x, -bounds.min.y, -center.z);
     group.scale.set(size.width / extent.x, size.height / extent.y, size.depth / extent.z);
     group.userData = {

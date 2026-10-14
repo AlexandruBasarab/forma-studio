@@ -173,15 +173,15 @@ const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(
     await page.fill('#topHex', '#bb3355'); await page.locator('#topHex').press('Tab'); await settle();
     const savedConfiguration = await state();
     const downloadPromise = page.waitForEvent('download'); await page.click('#saveBtn');
-    const download = await downloadPromise, projectPath = path.join(qaDir, 'countertops-project-v4.json');
+    const download = await downloadPromise, projectPath = path.join(qaDir, 'countertops-project-v5.json');
     await download.saveAs(projectPath);
     const saved = JSON.parse(fs.readFileSync(projectPath, 'utf8'));
-    assert.equal(saved.version, 4);
+    assert.equal(saved.version, 5);
     assert.deepEqual(saved.configuration.worktops, savedConfiguration.worktops);
     await page.click('#resetWorktop'); await settle();
     await page.setInputFiles('#projectFile', projectPath);
     await page.waitForFunction(() => FormaConfigurator.getState().worktops.table.widthDelta === 30); await settle();
-    assert.deepEqual((await state()).worktops, savedConfiguration.worktops, 'Version 4 project roundtrip');
+    assert.deepEqual((await state()).worktops, savedConfiguration.worktops, 'Version 5 project roundtrip');
     assert.equal((await state()).top, '#bb3355', 'Project roundtrip preserves finish color');
     await page.reload(); await page.waitForFunction(() => window.FormaConfigurator && document.querySelector('#loading').hidden);
     assert.deepEqual((await state()).worktops, savedConfiguration.worktops, 'Local storage roundtrip');
