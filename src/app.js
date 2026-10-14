@@ -15,6 +15,7 @@
   };
   const STORAGE = 'forma-furniture-v1';
   const APPEARANCE_PARAM = 'finisaje';
+  const CONFIGURATION_PARAM = 'config';
   const MATERIAL_ROLES = ['top', 'fronts', 'body'];
   const FINISH_LABELS = {wood:'Lemn', matte:'Mat', stone:'Piatră'};
   function appearancePayload() {
@@ -25,11 +26,15 @@
     }
     return payload;
   }
-  function decodeAppearance(token) {
-    if (!token || token.length > 1024 || !/^[A-Za-z0-9_-]+$/.test(token) || token.length % 4 === 1) throw new Error('Link invalid.');
+  function decodeSharedData(token, maxLength) {
+    if (!token || token.length > maxLength || !/^[A-Za-z0-9_-]+$/.test(token) || token.length % 4 === 1) throw new Error('Link invalid.');
     const json = atob(token.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(token.length/4)*4,'='));
     const data = JSON.parse(json);
     if (!data || typeof data !== 'object' || Array.isArray(data) || data.v !== 1) throw new Error('Versiune necunoscută.');
+    return data;
+  }
+  function decodeAppearance(token) {
+    const data = decodeSharedData(token,1024);
     const appearance = {};
     // Copy only validated material fields; a shared palette cannot replace the project.
     for (const role of MATERIAL_ROLES) {
@@ -39,11 +44,32 @@
     }
     return appearance;
   }
-  function appearanceUrl() {
+  function configurationPayload() {
+    return {
+      ...appearancePayload(), model:state.model,
+      sizes:{custom:state.sizes.custom,bar:state.sizes.bar}, worktops:state.worktops,
+      extension:state.extension, glass:state.glass, doorsOpen:state.doorsOpen, dimensions:state.dimensions
+    };
+  }
+  function decodeConfiguration(token) {
+    const data = decodeSharedData(token,8192);
+    if (!['custom','bar'].includes(data.model)) throw new Error('Model necunoscut.');
+    for (const key of ['glass','doorsOpen','dimensions']) {
+      if (typeof data[key] !== 'boolean') throw new Error('Opțiune invalidă.');
+    }
+    if (!data.sizes || typeof data.sizes !== 'object' || Array.isArray(data.sizes) || !data.sizes.custom || !data.sizes.bar || !data.worktops || typeof data.worktops !== 'object' || Array.isArray(data.worktops)) throw new Error('Lipsesc dimensiunile sau blaturile.');
+    // Reuse project validation, requiring every shared dimension and top setting.
+    // Photo data is local-only and never accepted from a compact configuration link.
+    return validate({...data,photo:null,sizes:{custom:data.sizes.custom,bar:data.sizes.bar}});
+  }
+  function shareUrl(mode = shareLinkMode || 'configuration') {
     const url = new URL(window.location.href);
-    // The schema contains ASCII HEX colors and finish identifiers, encoded as Base64url.
-    const token = btoa(JSON.stringify(appearancePayload())).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-    url.searchParams.set(APPEARANCE_PARAM,token);
+    const full = mode === 'configuration';
+    const payload = full ? configurationPayload() : appearancePayload();
+    // Both schemas contain only ASCII identifiers, HEX colors and numeric settings.
+    const token = btoa(JSON.stringify(payload)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    url.searchParams.delete(full ? APPEARANCE_PARAM : CONFIGURATION_PARAM);
+    url.searchParams.set(full ? CONFIGURATION_PARAM : APPEARANCE_PARAM,token);
     return url.href;
   }
   const SIZE_FIELDS = {
@@ -167,17 +193,29 @@
   let storageAvailable = true;
   try { const saved = localStorage.getItem(STORAGE); if (saved) state = validate(JSON.parse(saved)); }
   catch (_) { /* Start clean when an old project or browser policy prevents loading. */ }
-  let appearanceLinkActive = false, appearanceLoadMessage = '';
-  const sharedAppearances = new URL(window.location.href).searchParams.getAll(APPEARANCE_PARAM);
-  if (sharedAppearances.length) {
+  let shareLinkMode = null, shareLoadMessage = '';
+  const incomingParams = new URL(window.location.href).searchParams;
+  const sharedConfigurations = incomingParams.getAll(CONFIGURATION_PARAM);
+  const sharedAppearances = incomingParams.getAll(APPEARANCE_PARAM);
+  if (sharedConfigurations.length) {
+    try {
+      if (sharedConfigurations.length !== 1) throw new Error('Parametru duplicat.');
+      const restored = decodeConfiguration(sharedConfigurations[0]);
+      state = {...restored,photo:state.photo,sizes:{...restored.sizes,photo:state.sizes.photo}};
+      shareLinkMode = 'configuration';
+      shareLoadMessage = 'Configurația din link a fost aplicată: dimensiuni, blaturi, culori și funcții.';
+    } catch (_) {
+      shareLoadMessage = 'Linkul conține o configurație invalidă. Proiectul existent a fost păstrat.';
+    }
+  } else if (sharedAppearances.length) {
     try {
       if (sharedAppearances.length !== 1) throw new Error('Parametru duplicat.');
       Object.assign(state,decodeAppearance(sharedAppearances[0]));
       state.palette = matchedPalette(state);
-      appearanceLinkActive = true;
-      appearanceLoadMessage = 'Culorile și finisajele din link au fost aplicate.';
+      shareLinkMode = 'appearance';
+      shareLoadMessage = 'Culorile și finisajele din link au fost aplicate.';
     } catch (_) {
-      appearanceLoadMessage = 'Linkul conține culori sau finisaje invalide. Configurația existentă a fost păstrată.';
+      shareLoadMessage = 'Linkul conține culori sau finisaje invalide. Configurația existentă a fost păstrată.';
     }
   }
   function persist() {
@@ -344,7 +382,9 @@
     document.querySelectorAll('[data-model]').forEach(button => { const active = button.dataset.model === state.model; button.classList.toggle('active', active); button.setAttribute('aria-pressed', active); });
     document.querySelectorAll('[data-palette]').forEach(button => { const active = button.dataset.palette === state.palette; button.classList.toggle('active', active); button.setAttribute('aria-pressed', active); });
     for (const role of ['top','fronts','body']) {
-      $(role+'Color').value = state[role]; $(role+'Hex').value = state[role].toUpperCase(); $(role+'Finish').value = state[role+'Finish'];
+      $(role+'Color').value = state[role]; $(role+'Finish').value = state[role+'Finish'];
+      // A queued model rebuild must not discard a HEX value that is still being typed.
+      if(document.activeElement!==$(role+'Hex'))$(role+'Hex').value = state[role].toUpperCase();
     }
     $('paletteStatus').textContent = state.palette ? PRESETS[state.palette].name : 'Personalizată';
     $('doorsOpen').checked = state.doorsOpen; $('glass').checked = state.glass;
@@ -361,31 +401,49 @@
     $('viewport').setAttribute('aria-label', info.title + '. Model 3D. Trage pentru rotire, derulează pentru zoom. Săgeți pentru rotire, plus și minus pentru zoom.');
     syncSizeControls();
     syncWorktopControls();
-    syncAppearanceLink();
+    syncShareLink();
   }
-  function syncAppearanceLink() {
-    if (!appearanceLinkActive) return;
-    const url = appearanceUrl();
-    // Keep the address current after edits so copying it directly shares the visible palette.
+  function syncShareLink() {
+    // Legacy photo models remain shareable through exported project files.
+    if (shareLinkMode === 'configuration' && state.model === 'photo') {
+      shareLinkMode = null;
+      const url = new URL(window.location.href); url.searchParams.delete(CONFIGURATION_PARAM);
+      try { history.replaceState(history.state,'',url.href); } catch (_) {}
+    }
+    if (!shareLinkMode) return;
+    const url = shareUrl();
+    // An active share URL follows the edited configuration, including geometry and toggles.
     if (url !== window.location.href) {
       try { history.replaceState(history.state,'',url); }
       catch (_) { /* Some file viewers disallow changing history; the copyable link still works. */ }
     }
     if ($('shareAppearanceDialog').open && $('appearanceShareUrl').value !== url) {
       $('appearanceShareUrl').value = url;
-      updateAppearancePreview();
-      $('appearanceShareStatus').textContent = 'Link actualizat. Copiază-l pentru a partaja combinația curentă.';
+      updateSharePreview();
+      $('appearanceShareStatus').textContent = 'Link actualizat. Copiază-l pentru a partaja configurația curentă.';
     }
   }
-  function updateAppearancePreview() {
+  function updateSharePreview() {
+    $('share-model-value').textContent = MODELS[state.model].title;
+    $('share-size-value').textContent = fmt(metrics.width)+' × '+fmt(metrics.depth)+' × '+fmt(metrics.height)+' cm';
+    const worktops = resolvedWorktops();
+    $('share-worktops-value').textContent = (state.model==='custom' ? [['cabinet','Dulap']] : [['bar','Bar'],['table','Masă']]).map(([key,label])=>{
+      const top=worktops[key];
+      return label+': '+fmt(top.width)+' × '+fmt(top.depth)+' cm · X '+fmt(top.offsetX)+' / Z '+fmt(top.offsetZ)+' cm';
+    }).join('\n');
+    const details = ['Uși '+(state.doorsOpen?'deschise':'închise')];
+    if(state.model==='custom')details.push('Fronturi '+(state.glass?'din sticlă':'pline'));
+    if(state.model==='bar')details.push('Extensie '+fmt(extensionLength())+' cm');
+    details.push('Cote '+(state.dimensions?'afișate':'ascunse'));
+    $('share-details-value').textContent = details.join(' · ');
     for (const role of MATERIAL_ROLES) {
       $('share-'+role+'-chip').style.backgroundColor = state[role];
       $('share-'+role+'-value').textContent = state[role].toUpperCase()+' · '+FINISH_LABELS[state[role+'Finish']];
     }
   }
-  async function copyAppearanceLink() {
+  async function copyConfigurationLink() {
     const field = $('appearanceShareUrl'), status = $('appearanceShareStatus');
-    const url = appearanceUrl(); field.value = url;
+    const url = shareUrl('configuration'); field.value = url;
     try {
       if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard indisponibil.');
       await navigator.clipboard.writeText(url);
@@ -492,15 +550,21 @@
   function download(blob,name) { const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000); }
   $('saveBtn').addEventListener('click', () => {const project={format:'forma-furniture',version:4,savedAt:new Date().toISOString(),configuration:state};download(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),'forma-'+state.model+'.json');toast('Proiect salvat. Îl poți redeschide în acest configurator.');});
   $('shareAppearanceBtn').addEventListener('click', () => {
-    appearanceLinkActive = true; syncAppearanceLink();
-    $('appearanceShareUrl').value = appearanceUrl();
+    if(state.model==='photo') {
+      toast('Pentru a partaja mobilierul din fotografie, folosește „Salvează proiect” și trimite fișierul JSON.');
+      return;
+    }
+    // Flush debounced size edits before showing the measured dimensions in the summary.
+    if(pendingRebuild)rebuild();
+    shareLinkMode = 'configuration'; syncShareLink();
+    $('appearanceShareUrl').value = shareUrl();
     $('appearanceShareStatus').textContent = 'Se copiază linkul…';
     $('appearanceLocalNote').hidden = window.location.protocol !== 'file:';
-    updateAppearancePreview();
+    updateSharePreview();
     $('shareAppearanceDialog').showModal();
-    copyAppearanceLink();
+    copyConfigurationLink();
   });
-  $('copyAppearanceLink').addEventListener('click',copyAppearanceLink);
+  $('copyAppearanceLink').addEventListener('click',copyConfigurationLink);
   $('appearanceShareUrl').addEventListener('click',event=>event.target.select());
   $('closeAppearanceShare').addEventListener('click',()=>$('shareAppearanceDialog').close());
   $('shareAppearanceDialog').addEventListener('click',event=>{
@@ -544,7 +608,7 @@
   renderer.domElement.addEventListener('webglcontextlost', event=>{event.preventDefault();toast('Contextul grafic s-a întrerupt. Reîncarcă pagina pentru a restaura modelul.');});
   new ResizeObserver(resize).observe(viewport);
   rebuild(true); resize(); $('loading').hidden=true;
-  if(appearanceLoadMessage)toast(appearanceLoadMessage);
+  if(shareLoadMessage)toast(shareLoadMessage);
   function animate(){requestAnimationFrame(animate);if(pendingRebuild){pendingRebuild=false;rebuild();}if(dirty){renderer.render(scene,camera);dirty=false;}}
   animate();
   // Read-only inspection hook makes the generated dimensions and renderer verifiable.

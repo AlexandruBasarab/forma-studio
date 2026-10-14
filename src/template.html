@@ -53,14 +53,16 @@
   <div class="material-row"><label class="color-swatch" for="topColor"><input type="color" id="topColor" value="#c5a277" aria-label="Culoare Blat / Countertop"></label><div class="material-name"><label for="topColor">Blat / Countertop</label><input class="hex-input" id="topHex" value="#C5A277" maxlength="7" aria-label="Cod HEX blat" spellcheck="false"></div><select id="topFinish" aria-label="Finisaj blat"><option value="wood">Lemn</option><option value="matte">Mat</option><option value="stone">Piatră</option></select></div>
   <div class="material-row"><label class="color-swatch" for="frontsColor"><input type="color" id="frontsColor" value="#87927b" aria-label="Culoare Fronturi / Uși"></label><div class="material-name"><label for="frontsColor">Fronturi / Uși</label><input class="hex-input" id="frontsHex" value="#87927B" maxlength="7" aria-label="Cod HEX fronturi" spellcheck="false"></div><select id="frontsFinish" aria-label="Finisaj fronturi"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
   <div class="material-row"><label class="color-swatch" for="bodyColor"><input type="color" id="bodyColor" value="#eff0e7" aria-label="Culoare Carcasă și Corp"></label><div class="material-name"><label for="bodyColor">Carcasă & Corp</label><input class="hex-input" id="bodyHex" value="#EFF0E7" maxlength="7" aria-label="Cod HEX carcasă" spellcheck="false"></div><select id="bodyFinish" aria-label="Finisaj carcasă"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
-  <button id="shareAppearanceBtn" class="appearance-share-button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 15 6-6m-7 4-2 2a3 3 0 0 0 4 4l3-3m-2-8 3-3a3 3 0 0 1 4 4l-2 2"/></svg>Partajează culorile și finisajele</button>
-  <p class="appearance-share-hint">Păstrează combinația într-un link sau trimite-o mai departe.</p>
   </section>
-  <section class="control-section last-section"><div class="section-heading"><h2><span>06</span> Detalii & funcții</h2></div>
+  <section class="control-section"><div class="section-heading"><h2><span>06</span> Detalii & funcții</h2></div>
     <div id="extensionControl" class="extension-control" hidden><div class="range-label"><label for="extension">Extensia mesei</label><output id="extensionValue" for="extension">110 cm</output></div><input id="extension" type="range" min="0" max="100" value="100"><div class="range-ends"><span>Retrasă</span><span>Extinsă</span></div></div>
     <label class="toggle-row" for="doorsOpen"><span>Deschide ușile<small>Explorează spațiul de depozitare</small></span><input type="checkbox" id="doorsOpen" role="switch"><span class="switch"></span></label>
     <label class="toggle-row" for="glass" id="glassControl"><span>Fronturi din sticlă<small>Culoarea se aplică ramelor</small></span><input type="checkbox" id="glass" checked role="switch"><span class="switch"></span></label>
     <button id="resetBtn" class="reset-button">↺ &nbsp; Resetează configurația</button>
+  </section>
+  <section class="control-section last-section" id="sharingSettings"><div class="section-heading"><h2><span>07</span> Partajare</h2></div>
+    <button id="shareAppearanceBtn" class="appearance-share-button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 15 6-6m-7 4-2 2a3 3 0 0 0 4 4l3-3m-2-8 3-3a3 3 0 0 1 4 4l-2 2"/></svg>Partajează configurația</button>
+    <p class="appearance-share-hint">Modelul, dimensiunile, blaturile, culorile și funcțiile alese, într-un singur link.</p>
   </section>
   <div class="sidebar-footer"><span class="live-dot"></span> Modificările se păstrează în acest browser.</div>
 </aside>
@@ -78,15 +80,21 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <dialog id="shareAppearanceDialog" class="appearance-share-dialog" aria-labelledby="appearanceShareTitle" aria-describedby="appearanceShareDescription">
   <button id="closeAppearanceShare" class="dialog-close icon-button" aria-label="Închide partajarea">×</button>
-  <div class="eyebrow">COMBINAȚIA TA, ÎNTR-UN LINK</div>
-  <h2 id="appearanceShareTitle">Culori de dat mai departe.</h2>
-  <p id="appearanceShareDescription">La deschiderea linkului, culorile și finisajele se aplică automat. Modelul și dimensiunile rămân cele din proiectul destinatarului.</p>
+  <div class="eyebrow">CONFIGURAȚIA TA, ÎNTR-UN LINK</div>
+  <h2 id="appearanceShareTitle">Forma ta, de dat mai departe.</h2>
+  <p id="appearanceShareDescription">Linkul restabilește modelul, dimensiunile și compartimentarea, mărimea și poziția blaturilor, culorile, finisajele și funcțiile alese.</p>
+  <dl id="shareConfigurationSummary" class="configuration-share-summary">
+    <div><dt>Model</dt><dd id="share-model-value"></dd></div>
+    <div><dt>Dimensiuni</dt><dd id="share-size-value"></dd></div>
+    <div><dt>Blaturi</dt><dd id="share-worktops-value"></dd></div>
+    <div><dt>Detalii & funcții</dt><dd id="share-details-value"></dd></div>
+  </dl>
   <div class="appearance-share-preview">
     <div><i id="share-top-chip" aria-hidden="true"></i><span><strong>Blat / Countertop</strong><small id="share-top-value"></small></span></div>
     <div><i id="share-fronts-chip" aria-hidden="true"></i><span><strong>Fronturi / Uși</strong><small id="share-fronts-value"></small></span></div>
     <div><i id="share-body-chip" aria-hidden="true"></i><span><strong>Carcasă & Corp</strong><small id="share-body-value"></small></span></div>
   </div>
-  <label class="appearance-share-label" for="appearanceShareUrl">Linkul combinației</label>
+  <label class="appearance-share-label" for="appearanceShareUrl">Linkul configurației</label>
   <input id="appearanceShareUrl" class="appearance-share-url" type="text" readonly spellcheck="false" aria-describedby="appearanceShareStatus appearanceLocalNote">
   <p id="appearanceLocalNote" class="appearance-local-note" hidden>Acesta este un link către fișierul de pe calculatorul tău. Pentru a-l trimite altor persoane, publică pagina pe un site și generează linkul de acolo.</p>
   <button id="copyAppearanceLink" class="button dark appearance-copy-button" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H4v13h4"/></svg>Copiază linkul</button>

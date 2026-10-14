@@ -65,24 +65,29 @@ THE SOFTWARE.
 <style>.photo-upload-button{display:flex;align-items:center;gap:11px;width:100%;margin-top:12px;padding:13px 12px;border:1px dashed #b9c6b0;border-radius:8px;text-align:left;background:#fbfcf8;color:#53684b}.photo-upload-button:hover{background:#f1f5eb;border-color:#6a805d}.photo-upload-button>svg{width:21px;height:21px;flex-shrink:0}.photo-upload-button>span:first-of-type{flex:1;font-size:11px;font-weight:600}.photo-upload-button small{display:block;font-size:9px;color:#8c9982;font-weight:400;margin-top:3px}.photo-upload-button>span:last-child{font-size:23px;font-weight:300}.photo-close{position:absolute;right:21px;top:16px;font-size:27px;width:34px;height:34px;border-radius:6px;color:#73836a}.photo-close:hover{background:#eef2e8}#photoDialog{width:min(940px,calc(100vw - 36px));max-width:940px;max-height:92dvh;overflow:auto;padding:29px 30px 22px;border-radius:14px;background:#fff}#photoDialog .photo-header{padding-right:35px}#photoDialog h2{font-size:29px;font-weight:400;letter-spacing:-.7px;margin:8px 0 11px}#photoDialog .photo-header>p{font-size:11px;line-height:1.7;margin:0;max-width:680px;color:#7b8871}.photo-layout{display:grid;grid-template-columns:minmax(0,1.24fr) minmax(0,1fr);gap:26px;margin-top:23px}.photo-preview-tabs{display:flex;gap:4px;align-items:center;margin-bottom:10px;min-height:27px}.photo-preview-tabs button{font-size:10px;padding:6px 8px;border-radius:5px;color:#87937e}.photo-preview-tabs button[aria-pressed=true]{color:#445d3a;background:#eef2e7}.photo-preview-tabs button:hover:not(:disabled){background:#f1f4ec}#photoClearCrop{margin-left:auto;font-size:9px}.photo-canvas-wrap{position:relative;background:#f0f1e9;border:1px solid #e6eadf;border-radius:9px;overflow:hidden}.photo-canvas-wrap canvas{display:block;width:100%;height:auto;aspect-ratio:900/660;touch-action:none;cursor:crosshair}.photo-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;pointer-events:none;color:#7f8d73;gap:7px}.photo-empty svg{width:50px;height:50px;fill:none;stroke:#a6b39c;stroke-width:1.4;margin-bottom:7px}.photo-empty strong{font:20px Georgia,serif;font-weight:400;color:#6b7e5f}.photo-empty>span{font-size:9px;color:#9aa58e}#photoDialog .photo-crop-hint{font-size:9px;line-height:1.6;color:#909b86;margin:9px 0 12px}.photo-file-row{display:flex;align-items:center;gap:10px}.photo-file-row>span{font-size:9px;color:#909b86;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.photo-secondary,.photo-primary{border-radius:6px;padding:10px 13px;font-size:10px;font-weight:600;white-space:nowrap}.photo-secondary{background:#fff;border:1px solid #dce3d5;color:#627656}.photo-secondary:hover:not(:disabled){background:#f3f6ed;border-color:#b6c5a8}.photo-primary{background:#3f5938;color:#fff;border:1px solid #3f5938}.photo-primary:hover:not(:disabled){background:#2d4526}#photoDialog button:disabled{opacity:.4;cursor:default}.photo-step{display:flex;align-items:center;gap:9px;margin:7px 0 15px}.photo-step>span{font-size:9px;color:#a3af98;letter-spacing:.5px}.photo-step h3{font-size:11px;font-weight:600;margin:0;color:#4b6041}.photo-tolerance-label{display:flex;justify-content:space-between;font-size:10px;color:#7a8870}.photo-tolerance-label output{color:#607851;font-size:10px}#photoTolerance{margin:17px 0 9px}#photoDialog .photo-small{font-size:9px;line-height:1.65;color:#949e8b;margin:3px 0 20px}.photo-size-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:11px}.photo-size-grid>label{font-size:9px;color:#839177}.photo-size-grid>label>span{display:flex;align-items:center;border:1px solid #e0e6d8;border-radius:5px;padding-right:8px;margin-top:6px;background:#fcfdf9;color:#9ca78f;font-size:9px}.photo-size-grid input{width:100%;min-width:0;padding:9px 5px 9px 8px;background:none;border:0;color:#526747;font-size:12px;appearance:textfield;-moz-appearance:textfield}.photo-size-grid input::-webkit-inner-spin-button,.photo-size-grid input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.photo-size-grid>label>span:focus-within{outline:2px solid #7a8d6a;outline-offset:2px}.photo-size-grid input:focus{outline:0}.photo-limits{background:#f6f8f1;border-radius:7px;padding:12px 13px}.photo-limits>strong{font-size:10px;font-weight:600;color:#798b6d}#photoDialog .photo-limits>p{font-size:9px;line-height:1.65;margin:5px 0 0;color:#8c9980}.photo-footer{display:flex;gap:20px;align-items:center;justify-content:space-between;border-top:1px solid #e8ecdf;margin-top:23px;padding-top:18px}#photoDialog #photoStatus{font-size:10px;line-height:1.6;color:#7c8a71;margin:0}#photoDialog #photoStatus[data-kind=error]{color:#a14c3e}#photoDialog #photoStatus[data-kind=success]{color:#52733d}#photoDialog #photoResultNote{margin:5px 0 0;font-size:8px}.photo-actions{display:flex;gap:8px;flex-shrink:0}.photo-visual,.photo-settings,.photo-footer>div{min-width:0}@media(max-width:780px){#photoDialog{padding:24px 22px 21px}.photo-layout{gap:20px}.photo-footer{align-items:stretch;flex-direction:column;gap:13px}.photo-actions{justify-content:flex-end}}@media(max-width:600px){#photoDialog{width:calc(100vw - 24px);max-height:94dvh;padding:24px 17px 18px}.photo-layout{grid-template-columns:1fr;gap:18px;margin-top:18px}.photo-settings{border-top:1px solid #e9eddf;padding-top:12px}#photoDialog h2{font-size:26px}.photo-header{padding-right:19px!important}#photoDialog .photo-header>p{font-size:10px}.photo-close{right:10px;top:10px}.photo-canvas-wrap canvas{max-height:none}.photo-step{margin-top:3px}.photo-size-grid input{font-size:14px}.photo-footer{margin-top:15px;padding-top:14px}.photo-actions{gap:7px;display:grid;grid-template-columns:1fr 1fr}.photo-actions button{font-size:9px;padding:11px 8px}.photo-upload-button>span:first-of-type{font-size:12px}.photo-upload-button small{font-size:10px}}@media(prefers-reduced-motion:reduce){#photoDialog *{scroll-behavior:auto}}
 .photo-model-card{grid-column:1/-1;display:flex;align-items:center;gap:13px;padding:11px 12px}.photo-model-card>img{width:56px;height:56px;object-fit:contain;border-radius:5px;background:#fff;flex-shrink:0;border:1px solid #e1e6d8}.photo-model-card>span:not(.selected-dot){min-width:0}.photo-model-card strong{font-size:11px}.photo-model-card .photo-card-name{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;color:#798d6b}.photo-model-card .photo-card-size{font-size:8px}.photo-model-card .selected-dot{top:12px;right:12px}
 </style>
-<style>.appearance-share-button{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:20px;padding:11px 9px;border:1px solid #cbd5c2;border-radius:7px;background:#f1f4eb;color:#435437;font-size:10px;font-weight:600;line-height:1.4}
+<style>.appearance-share-button{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:0;padding:11px 9px;border:1px solid #cbd5c2;border-radius:7px;background:#f1f4eb;color:#435437;font-size:10px;font-weight:600;line-height:1.4}
 .appearance-share-button:hover{background:#e5ecd9;border-color:#97a88a}
 .appearance-share-button svg{width:17px;height:17px;flex-shrink:0}
 .appearance-share-hint{margin:8px 0 0;font-size:9px;line-height:1.6;color:var(--muted)}
-.appearance-share-dialog{width:480px;max-width:calc(100vw - 30px);max-height:calc(100dvh - 30px);overflow:auto}
+.appearance-share-dialog{width:530px;max-width:calc(100vw - 30px);max-height:calc(100dvh - 30px);overflow:auto;overscroll-behavior:contain}
 .appearance-share-dialog h2{margin:14px 0}
 .appearance-share-dialog>p{font-size:12px}
-.appearance-share-preview{display:grid;gap:11px;padding:17px 0;margin-bottom:10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.appearance-share-preview>div{display:flex;gap:11px;align-items:center}
-.appearance-share-preview i{display:block;width:33px;height:33px;flex-shrink:0;border:1px solid #0002;border-radius:6px}
-.appearance-share-preview strong{display:block;font-size:11px;font-weight:600}
-.appearance-share-preview small{display:block;font:10px/1.5 Consolas,monospace;color:#7b8572;margin-top:3px}
+.configuration-share-summary{display:grid;gap:9px;margin:18px 0;padding:13px 15px;border:1px solid var(--line);border-radius:7px;background:#f7f8f3}
+.configuration-share-summary>div{display:grid;grid-template-columns:94px minmax(0,1fr);gap:10px;align-items:baseline}
+.configuration-share-summary dt{font-size:10px;color:var(--muted)}
+.configuration-share-summary dd{margin:0;font-size:11px;line-height:1.5;color:#45573c;overflow-wrap:anywhere;white-space:pre-line}
+.appearance-share-preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:14px 0;margin-bottom:10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.appearance-share-preview>div{display:flex;gap:7px;align-items:flex-start;min-width:0}
+.appearance-share-preview i{display:block;width:24px;height:24px;flex-shrink:0;border:1px solid #0002;border-radius:5px}
+.appearance-share-preview strong{display:block;font-size:10px;font-weight:600;line-height:1.4}
+.appearance-share-preview small{display:block;font:9px/1.5 Consolas,monospace;color:#7b8572;margin-top:3px;overflow-wrap:anywhere}
 .appearance-share-label{display:block;font-size:11px;margin:17px 0 8px;color:#596c4e}
 .appearance-share-url{display:block;width:100%;min-width:0;padding:12px;border:1px solid #ccd5c2;border-radius:7px;background:#f7f9f2;color:#45573c;font:11px/1.5 Consolas,monospace}
 .appearance-copy-button{margin-top:15px;width:100%;justify-content:center}
 .appearance-share-dialog .appearance-share-status{font-size:11px;line-height:1.6;margin:11px 0 0;min-height:35px;color:#596c4e}
 .appearance-share-dialog .appearance-local-note{background:#fbf5e7;color:#856735;font-size:11px;line-height:1.6;border-radius:6px;padding:11px;margin:12px 0}
 @media(max-width:760px){.appearance-share-button{font-size:12px;padding:13px}.appearance-share-hint{font-size:10px}.appearance-share-dialog{padding:30px 23px 22px}.appearance-share-dialog h2{font-size:27px}.appearance-share-url{font-size:12px}.appearance-copy-button{font-size:12px;padding:12px}}
+@media(max-width:420px){.configuration-share-summary{padding:12px}.configuration-share-summary>div{grid-template-columns:78px minmax(0,1fr);gap:8px}.appearance-share-preview{gap:8px}.appearance-share-preview>div{flex-direction:column;gap:5px}.appearance-share-preview strong{font-size:9px}}
 </style>
 </head>
 <body>
@@ -128,14 +133,16 @@ THE SOFTWARE.
   <div class="material-row"><label class="color-swatch" for="topColor"><input type="color" id="topColor" value="#c5a277" aria-label="Culoare Blat / Countertop"></label><div class="material-name"><label for="topColor">Blat / Countertop</label><input class="hex-input" id="topHex" value="#C5A277" maxlength="7" aria-label="Cod HEX blat" spellcheck="false"></div><select id="topFinish" aria-label="Finisaj blat"><option value="wood">Lemn</option><option value="matte">Mat</option><option value="stone">Piatră</option></select></div>
   <div class="material-row"><label class="color-swatch" for="frontsColor"><input type="color" id="frontsColor" value="#87927b" aria-label="Culoare Fronturi / Uși"></label><div class="material-name"><label for="frontsColor">Fronturi / Uși</label><input class="hex-input" id="frontsHex" value="#87927B" maxlength="7" aria-label="Cod HEX fronturi" spellcheck="false"></div><select id="frontsFinish" aria-label="Finisaj fronturi"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
   <div class="material-row"><label class="color-swatch" for="bodyColor"><input type="color" id="bodyColor" value="#eff0e7" aria-label="Culoare Carcasă și Corp"></label><div class="material-name"><label for="bodyColor">Carcasă & Corp</label><input class="hex-input" id="bodyHex" value="#EFF0E7" maxlength="7" aria-label="Cod HEX carcasă" spellcheck="false"></div><select id="bodyFinish" aria-label="Finisaj carcasă"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
-  <button id="shareAppearanceBtn" class="appearance-share-button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 15 6-6m-7 4-2 2a3 3 0 0 0 4 4l3-3m-2-8 3-3a3 3 0 0 1 4 4l-2 2"/></svg>Partajează culorile și finisajele</button>
-  <p class="appearance-share-hint">Păstrează combinația într-un link sau trimite-o mai departe.</p>
   </section>
-  <section class="control-section last-section"><div class="section-heading"><h2><span>06</span> Detalii & funcții</h2></div>
+  <section class="control-section"><div class="section-heading"><h2><span>06</span> Detalii & funcții</h2></div>
     <div id="extensionControl" class="extension-control" hidden><div class="range-label"><label for="extension">Extensia mesei</label><output id="extensionValue" for="extension">110 cm</output></div><input id="extension" type="range" min="0" max="100" value="100"><div class="range-ends"><span>Retrasă</span><span>Extinsă</span></div></div>
     <label class="toggle-row" for="doorsOpen"><span>Deschide ușile<small>Explorează spațiul de depozitare</small></span><input type="checkbox" id="doorsOpen" role="switch"><span class="switch"></span></label>
     <label class="toggle-row" for="glass" id="glassControl"><span>Fronturi din sticlă<small>Culoarea se aplică ramelor</small></span><input type="checkbox" id="glass" checked role="switch"><span class="switch"></span></label>
     <button id="resetBtn" class="reset-button">↺ &nbsp; Resetează configurația</button>
+  </section>
+  <section class="control-section last-section" id="sharingSettings"><div class="section-heading"><h2><span>07</span> Partajare</h2></div>
+    <button id="shareAppearanceBtn" class="appearance-share-button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 15 6-6m-7 4-2 2a3 3 0 0 0 4 4l3-3m-2-8 3-3a3 3 0 0 1 4 4l-2 2"/></svg>Partajează configurația</button>
+    <p class="appearance-share-hint">Modelul, dimensiunile, blaturile, culorile și funcțiile alese, într-un singur link.</p>
   </section>
   <div class="sidebar-footer"><span class="live-dot"></span> Modificările se păstrează în acest browser.</div>
 </aside>
@@ -153,15 +160,21 @@ THE SOFTWARE.
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <dialog id="shareAppearanceDialog" class="appearance-share-dialog" aria-labelledby="appearanceShareTitle" aria-describedby="appearanceShareDescription">
   <button id="closeAppearanceShare" class="dialog-close icon-button" aria-label="Închide partajarea">×</button>
-  <div class="eyebrow">COMBINAȚIA TA, ÎNTR-UN LINK</div>
-  <h2 id="appearanceShareTitle">Culori de dat mai departe.</h2>
-  <p id="appearanceShareDescription">La deschiderea linkului, culorile și finisajele se aplică automat. Modelul și dimensiunile rămân cele din proiectul destinatarului.</p>
+  <div class="eyebrow">CONFIGURAȚIA TA, ÎNTR-UN LINK</div>
+  <h2 id="appearanceShareTitle">Forma ta, de dat mai departe.</h2>
+  <p id="appearanceShareDescription">Linkul restabilește modelul, dimensiunile și compartimentarea, mărimea și poziția blaturilor, culorile, finisajele și funcțiile alese.</p>
+  <dl id="shareConfigurationSummary" class="configuration-share-summary">
+    <div><dt>Model</dt><dd id="share-model-value"></dd></div>
+    <div><dt>Dimensiuni</dt><dd id="share-size-value"></dd></div>
+    <div><dt>Blaturi</dt><dd id="share-worktops-value"></dd></div>
+    <div><dt>Detalii & funcții</dt><dd id="share-details-value"></dd></div>
+  </dl>
   <div class="appearance-share-preview">
     <div><i id="share-top-chip" aria-hidden="true"></i><span><strong>Blat / Countertop</strong><small id="share-top-value"></small></span></div>
     <div><i id="share-fronts-chip" aria-hidden="true"></i><span><strong>Fronturi / Uși</strong><small id="share-fronts-value"></small></span></div>
     <div><i id="share-body-chip" aria-hidden="true"></i><span><strong>Carcasă & Corp</strong><small id="share-body-value"></small></span></div>
   </div>
-  <label class="appearance-share-label" for="appearanceShareUrl">Linkul combinației</label>
+  <label class="appearance-share-label" for="appearanceShareUrl">Linkul configurației</label>
   <input id="appearanceShareUrl" class="appearance-share-url" type="text" readonly spellcheck="false" aria-describedby="appearanceShareStatus appearanceLocalNote">
   <p id="appearanceLocalNote" class="appearance-local-note" hidden>Acesta este un link către fișierul de pe calculatorul tău. Pentru a-l trimite altor persoane, publică pagina pe un site și generează linkul de acolo.</p>
   <button id="copyAppearanceLink" class="button dark appearance-copy-button" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H4v13h4"/></svg>Copiază linkul</button>
@@ -1622,6 +1635,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   };
   const STORAGE = 'forma-furniture-v1';
   const APPEARANCE_PARAM = 'finisaje';
+  const CONFIGURATION_PARAM = 'config';
   const MATERIAL_ROLES = ['top', 'fronts', 'body'];
   const FINISH_LABELS = {wood:'Lemn', matte:'Mat', stone:'Piatră'};
   function appearancePayload() {
@@ -1632,11 +1646,15 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     }
     return payload;
   }
-  function decodeAppearance(token) {
-    if (!token || token.length > 1024 || !/^[A-Za-z0-9_-]+$/.test(token) || token.length % 4 === 1) throw new Error('Link invalid.');
+  function decodeSharedData(token, maxLength) {
+    if (!token || token.length > maxLength || !/^[A-Za-z0-9_-]+$/.test(token) || token.length % 4 === 1) throw new Error('Link invalid.');
     const json = atob(token.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(token.length/4)*4,'='));
     const data = JSON.parse(json);
     if (!data || typeof data !== 'object' || Array.isArray(data) || data.v !== 1) throw new Error('Versiune necunoscută.');
+    return data;
+  }
+  function decodeAppearance(token) {
+    const data = decodeSharedData(token,1024);
     const appearance = {};
     // Copy only validated material fields; a shared palette cannot replace the project.
     for (const role of MATERIAL_ROLES) {
@@ -1646,11 +1664,32 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     }
     return appearance;
   }
-  function appearanceUrl() {
+  function configurationPayload() {
+    return {
+      ...appearancePayload(), model:state.model,
+      sizes:{custom:state.sizes.custom,bar:state.sizes.bar}, worktops:state.worktops,
+      extension:state.extension, glass:state.glass, doorsOpen:state.doorsOpen, dimensions:state.dimensions
+    };
+  }
+  function decodeConfiguration(token) {
+    const data = decodeSharedData(token,8192);
+    if (!['custom','bar'].includes(data.model)) throw new Error('Model necunoscut.');
+    for (const key of ['glass','doorsOpen','dimensions']) {
+      if (typeof data[key] !== 'boolean') throw new Error('Opțiune invalidă.');
+    }
+    if (!data.sizes || typeof data.sizes !== 'object' || Array.isArray(data.sizes) || !data.sizes.custom || !data.sizes.bar || !data.worktops || typeof data.worktops !== 'object' || Array.isArray(data.worktops)) throw new Error('Lipsesc dimensiunile sau blaturile.');
+    // Reuse project validation, requiring every shared dimension and top setting.
+    // Photo data is local-only and never accepted from a compact configuration link.
+    return validate({...data,photo:null,sizes:{custom:data.sizes.custom,bar:data.sizes.bar}});
+  }
+  function shareUrl(mode = shareLinkMode || 'configuration') {
     const url = new URL(window.location.href);
-    // The schema contains ASCII HEX colors and finish identifiers, encoded as Base64url.
-    const token = btoa(JSON.stringify(appearancePayload())).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-    url.searchParams.set(APPEARANCE_PARAM,token);
+    const full = mode === 'configuration';
+    const payload = full ? configurationPayload() : appearancePayload();
+    // Both schemas contain only ASCII identifiers, HEX colors and numeric settings.
+    const token = btoa(JSON.stringify(payload)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    url.searchParams.delete(full ? APPEARANCE_PARAM : CONFIGURATION_PARAM);
+    url.searchParams.set(full ? CONFIGURATION_PARAM : APPEARANCE_PARAM,token);
     return url.href;
   }
   const SIZE_FIELDS = {
@@ -1774,17 +1813,29 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   let storageAvailable = true;
   try { const saved = localStorage.getItem(STORAGE); if (saved) state = validate(JSON.parse(saved)); }
   catch (_) { /* Start clean when an old project or browser policy prevents loading. */ }
-  let appearanceLinkActive = false, appearanceLoadMessage = '';
-  const sharedAppearances = new URL(window.location.href).searchParams.getAll(APPEARANCE_PARAM);
-  if (sharedAppearances.length) {
+  let shareLinkMode = null, shareLoadMessage = '';
+  const incomingParams = new URL(window.location.href).searchParams;
+  const sharedConfigurations = incomingParams.getAll(CONFIGURATION_PARAM);
+  const sharedAppearances = incomingParams.getAll(APPEARANCE_PARAM);
+  if (sharedConfigurations.length) {
+    try {
+      if (sharedConfigurations.length !== 1) throw new Error('Parametru duplicat.');
+      const restored = decodeConfiguration(sharedConfigurations[0]);
+      state = {...restored,photo:state.photo,sizes:{...restored.sizes,photo:state.sizes.photo}};
+      shareLinkMode = 'configuration';
+      shareLoadMessage = 'Configurația din link a fost aplicată: dimensiuni, blaturi, culori și funcții.';
+    } catch (_) {
+      shareLoadMessage = 'Linkul conține o configurație invalidă. Proiectul existent a fost păstrat.';
+    }
+  } else if (sharedAppearances.length) {
     try {
       if (sharedAppearances.length !== 1) throw new Error('Parametru duplicat.');
       Object.assign(state,decodeAppearance(sharedAppearances[0]));
       state.palette = matchedPalette(state);
-      appearanceLinkActive = true;
-      appearanceLoadMessage = 'Culorile și finisajele din link au fost aplicate.';
+      shareLinkMode = 'appearance';
+      shareLoadMessage = 'Culorile și finisajele din link au fost aplicate.';
     } catch (_) {
-      appearanceLoadMessage = 'Linkul conține culori sau finisaje invalide. Configurația existentă a fost păstrată.';
+      shareLoadMessage = 'Linkul conține culori sau finisaje invalide. Configurația existentă a fost păstrată.';
     }
   }
   function persist() {
@@ -1951,7 +2002,9 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     document.querySelectorAll('[data-model]').forEach(button => { const active = button.dataset.model === state.model; button.classList.toggle('active', active); button.setAttribute('aria-pressed', active); });
     document.querySelectorAll('[data-palette]').forEach(button => { const active = button.dataset.palette === state.palette; button.classList.toggle('active', active); button.setAttribute('aria-pressed', active); });
     for (const role of ['top','fronts','body']) {
-      $(role+'Color').value = state[role]; $(role+'Hex').value = state[role].toUpperCase(); $(role+'Finish').value = state[role+'Finish'];
+      $(role+'Color').value = state[role]; $(role+'Finish').value = state[role+'Finish'];
+      // A queued model rebuild must not discard a HEX value that is still being typed.
+      if(document.activeElement!==$(role+'Hex'))$(role+'Hex').value = state[role].toUpperCase();
     }
     $('paletteStatus').textContent = state.palette ? PRESETS[state.palette].name : 'Personalizată';
     $('doorsOpen').checked = state.doorsOpen; $('glass').checked = state.glass;
@@ -1968,31 +2021,49 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
     $('viewport').setAttribute('aria-label', info.title + '. Model 3D. Trage pentru rotire, derulează pentru zoom. Săgeți pentru rotire, plus și minus pentru zoom.');
     syncSizeControls();
     syncWorktopControls();
-    syncAppearanceLink();
+    syncShareLink();
   }
-  function syncAppearanceLink() {
-    if (!appearanceLinkActive) return;
-    const url = appearanceUrl();
-    // Keep the address current after edits so copying it directly shares the visible palette.
+  function syncShareLink() {
+    // Legacy photo models remain shareable through exported project files.
+    if (shareLinkMode === 'configuration' && state.model === 'photo') {
+      shareLinkMode = null;
+      const url = new URL(window.location.href); url.searchParams.delete(CONFIGURATION_PARAM);
+      try { history.replaceState(history.state,'',url.href); } catch (_) {}
+    }
+    if (!shareLinkMode) return;
+    const url = shareUrl();
+    // An active share URL follows the edited configuration, including geometry and toggles.
     if (url !== window.location.href) {
       try { history.replaceState(history.state,'',url); }
       catch (_) { /* Some file viewers disallow changing history; the copyable link still works. */ }
     }
     if ($('shareAppearanceDialog').open && $('appearanceShareUrl').value !== url) {
       $('appearanceShareUrl').value = url;
-      updateAppearancePreview();
-      $('appearanceShareStatus').textContent = 'Link actualizat. Copiază-l pentru a partaja combinația curentă.';
+      updateSharePreview();
+      $('appearanceShareStatus').textContent = 'Link actualizat. Copiază-l pentru a partaja configurația curentă.';
     }
   }
-  function updateAppearancePreview() {
+  function updateSharePreview() {
+    $('share-model-value').textContent = MODELS[state.model].title;
+    $('share-size-value').textContent = fmt(metrics.width)+' × '+fmt(metrics.depth)+' × '+fmt(metrics.height)+' cm';
+    const worktops = resolvedWorktops();
+    $('share-worktops-value').textContent = (state.model==='custom' ? [['cabinet','Dulap']] : [['bar','Bar'],['table','Masă']]).map(([key,label])=>{
+      const top=worktops[key];
+      return label+': '+fmt(top.width)+' × '+fmt(top.depth)+' cm · X '+fmt(top.offsetX)+' / Z '+fmt(top.offsetZ)+' cm';
+    }).join('\n');
+    const details = ['Uși '+(state.doorsOpen?'deschise':'închise')];
+    if(state.model==='custom')details.push('Fronturi '+(state.glass?'din sticlă':'pline'));
+    if(state.model==='bar')details.push('Extensie '+fmt(extensionLength())+' cm');
+    details.push('Cote '+(state.dimensions?'afișate':'ascunse'));
+    $('share-details-value').textContent = details.join(' · ');
     for (const role of MATERIAL_ROLES) {
       $('share-'+role+'-chip').style.backgroundColor = state[role];
       $('share-'+role+'-value').textContent = state[role].toUpperCase()+' · '+FINISH_LABELS[state[role+'Finish']];
     }
   }
-  async function copyAppearanceLink() {
+  async function copyConfigurationLink() {
     const field = $('appearanceShareUrl'), status = $('appearanceShareStatus');
-    const url = appearanceUrl(); field.value = url;
+    const url = shareUrl('configuration'); field.value = url;
     try {
       if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard indisponibil.');
       await navigator.clipboard.writeText(url);
@@ -2099,15 +2170,21 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   function download(blob,name) { const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000); }
   $('saveBtn').addEventListener('click', () => {const project={format:'forma-furniture',version:4,savedAt:new Date().toISOString(),configuration:state};download(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),'forma-'+state.model+'.json');toast('Proiect salvat. Îl poți redeschide în acest configurator.');});
   $('shareAppearanceBtn').addEventListener('click', () => {
-    appearanceLinkActive = true; syncAppearanceLink();
-    $('appearanceShareUrl').value = appearanceUrl();
+    if(state.model==='photo') {
+      toast('Pentru a partaja mobilierul din fotografie, folosește „Salvează proiect” și trimite fișierul JSON.');
+      return;
+    }
+    // Flush debounced size edits before showing the measured dimensions in the summary.
+    if(pendingRebuild)rebuild();
+    shareLinkMode = 'configuration'; syncShareLink();
+    $('appearanceShareUrl').value = shareUrl();
     $('appearanceShareStatus').textContent = 'Se copiază linkul…';
     $('appearanceLocalNote').hidden = window.location.protocol !== 'file:';
-    updateAppearancePreview();
+    updateSharePreview();
     $('shareAppearanceDialog').showModal();
-    copyAppearanceLink();
+    copyConfigurationLink();
   });
-  $('copyAppearanceLink').addEventListener('click',copyAppearanceLink);
+  $('copyAppearanceLink').addEventListener('click',copyConfigurationLink);
   $('appearanceShareUrl').addEventListener('click',event=>event.target.select());
   $('closeAppearanceShare').addEventListener('click',()=>$('shareAppearanceDialog').close());
   $('shareAppearanceDialog').addEventListener('click',event=>{
@@ -2151,7 +2228,7 @@ function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"f
   renderer.domElement.addEventListener('webglcontextlost', event=>{event.preventDefault();toast('Contextul grafic s-a întrerupt. Reîncarcă pagina pentru a restaura modelul.');});
   new ResizeObserver(resize).observe(viewport);
   rebuild(true); resize(); $('loading').hidden=true;
-  if(appearanceLoadMessage)toast(appearanceLoadMessage);
+  if(shareLoadMessage)toast(shareLoadMessage);
   function animate(){requestAnimationFrame(animate);if(pendingRebuild){pendingRebuild=false;rebuild();}if(dirty){renderer.render(scene,camera);dirty=false;}}
   animate();
   // Read-only inspection hook makes the generated dimensions and renderer verifiable.

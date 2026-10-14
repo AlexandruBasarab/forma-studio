@@ -11,7 +11,7 @@ Configurator 3D de mobilier pentru explorarea culorilor, finisajelor și dimensi
 - Lățime, adâncime și poziție independente pentru fiecare blat, inclusiv depășiri față de corp.
 - Rotire 3D, zoom, vederi prestabilite, cote și deschiderea ușilor.
 - Salvare automată în browser, export/import de proiecte JSON și export de imagini PNG.
-- Partajarea culorilor și finisajelor prin link.
+- Partajarea configurației prin link: model, dimensiuni, blaturi, culori, finisaje și funcții.
 
 Generarea unui model din fotografie este ascunsă temporar. Codul acestei funcții rămâne în proiect pentru o eventuală reactivare.
 
@@ -36,23 +36,47 @@ Editează fișierele din `src/`, apoi rulează din nou build-ul. Nu edita direct
 
 Rulează `npm run build`, apoi încarcă folderul `dist` pe un serviciu de găzduire statică. Pentru Netlify, configurația din `netlify.toml` folosește automat comanda de build și folderul `dist`.
 
-## Partajarea culorilor
+## Partajarea configurației
 
-În secțiunea **Culori & finisaje**, apasă **Partajează culorile și finisajele**. Linkul conține parametrul `finisaje`, cu un obiect JSON codificat Base64url:
+În secțiunea **Partajare**, apasă **Partajează configurația**. Linkul conține parametrul `config`, cu un obiect JSON codificat Base64url:
 
 ```json
 {
   "v": 1,
+  "model": "custom",
   "top": "#c5a277",
   "topFinish": "wood",
   "fronts": "#87927b",
   "frontsFinish": "matte",
   "body": "#eff0e7",
-  "bodyFinish": "matte"
+  "bodyFinish": "matte",
+  "sizes": {
+    "custom": {
+      "width": 200, "depth": 50, "height": 215,
+      "counterHeight": 90, "upperDepth": 30, "nicheHeight": 47.5
+    },
+    "bar": {
+      "width": 80, "depth": 90, "height": 110,
+      "tableLength": 110, "tableDepth": 90, "tableHeight": 76
+    }
+  },
+  "worktops": {
+    "cabinet": {"widthDelta": 0, "depthDelta": 0, "offsetX": 0, "offsetZ": 0},
+    "bar": {"widthDelta": 0, "depthDelta": 0, "offsetX": 0, "offsetZ": 0},
+    "table": {"widthDelta": 0, "depthDelta": 0, "offsetX": 0, "offsetZ": 0}
+  },
+  "extension": 1,
+  "glass": true,
+  "doorsOpen": false,
+  "dimensions": false
 }
 ```
 
-La deschidere, valorile din link se aplică peste culorile salvate în browser. Modelul, dimensiunile și pozițiile blaturilor destinatarului sunt păstrate. Parametrii invalizi sunt respinși. După partajare, modificarea culorilor actualizează și adresa paginii.
+La deschidere, linkul restabilește modelul selectat (`custom` sau `bar`), dimensiunile ambelor modele, cele trei blaturi și opțiunile de afișare, împreună cu toate culorile și finisajele. Dimensiunile și deplasările sunt în centimetri. `widthDelta` și `depthDelta` reprezintă ajustările față de dimensiunea implicită a blatului, astfel încât depășirile se păstrează când corpul sau extensia mesei se modifică. `offsetX` mută blatul spre dreapta pentru valori pozitive, iar `offsetZ` spre față. `extension` este între `0` (retrasă) și `1` (extinsă).
+
+Parametrii invalizi sunt respinși. După partajare, modificările configurației actualizează și adresa paginii. Linkurile vechi cu parametrul `finisaje` rămân compatibile și aplică numai cele șase câmpuri de culori și finisaje, păstrând modelul și dimensiunile destinatarului.
+
+Partajarea prin link este disponibilă pentru cele două modele parametrice. Pentru un model creat anterior din fotografie, folosește exportul și importul proiectului JSON.
 
 Pentru a trimite linkul altor persoane, generează-l din versiunea publicată pe web. Un link `file://` indică un fișier de pe calculatorul local.
 
