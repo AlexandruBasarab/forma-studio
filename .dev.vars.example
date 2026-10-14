@@ -1,0 +1,10 @@
+# Copy this file to .dev.vars for LOCAL development only; .dev.vars is ignored.
+# Set a unique random value of at least 32 characters. Do not commit this value.
+# In Cloudflare, configure this as a Worker secret, not a public variable.
+AI_SESSION_SECRET=
+
+# Optional model overrides; these are public model names, never API keys.
+# OPENAI_MODEL=gpt-6-luna
+# GEMINI_MODEL=gemini-3.8-flash
+
+# Provider API keys are entered by each user and are never stored in this file.

@@ -95,8 +95,8 @@ const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(
       closeTo(box.center[0], x, `${label} x`); closeTo(box.center[2], z, `${label} z`);
     }
 
-    assert.equal(await page.locator('#photoUploadBtn').count(), 0, 'Photo generation launcher is not mounted');
-    assert.equal(await page.locator('#photoDialog').count(), 0, 'Photo generation dialog is not mounted');
+    assert.equal(await page.locator('#photoUploadBtn').count(), 1, 'External AI launcher is mounted');
+    assert.equal(await page.locator('#photoDialog').count(), 1, 'External AI dialog is mounted');
     assert(await page.locator('#worktopSettings').isVisible(), 'Worktop controls are available');
     assert.deepEqual((await state()).worktops, DEFAULT_WORKTOPS);
     assert.equal(await page.inputValue('#worktopSelect'), 'cabinet');
@@ -185,7 +185,7 @@ const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(
     assert.equal((await state()).top, '#bb3355', 'Project roundtrip preserves finish color');
     await page.reload(); await page.waitForFunction(() => window.FormaConfigurator && document.querySelector('#loading').hidden);
     assert.deepEqual((await state()).worktops, savedConfiguration.worktops, 'Local storage roundtrip');
-    assert.equal(await page.locator('#photoUploadBtn').count(), 0);
+    assert.equal(await page.locator('#photoUploadBtn').count(), 1);
     await selectTop('table');
     checkBox(await meshBox('bar-tabletop'), 140.5, 110, oldTableTop.center[0] - 10, 10, 'Reloaded table top');
 
@@ -213,15 +213,15 @@ const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(
       await page.waitForFunction(() => FormaConfigurator.getState().model === 'photo'); await settle();
       assert(await finiteGeometry(), 'Existing photo model remains usable');
       assert(await page.locator('#worktopSettings').isHidden(), 'Separate top controls hide for old photo volume');
-      assert.equal(await page.locator('#photoUploadBtn').count(), 0, 'Old photo project does not re-enable photo creation');
-      assert.equal(await page.locator('#photoDialog').count(), 0);
+      assert.equal(await page.locator('#photoUploadBtn').count(), 1, 'AI launcher also supports legacy photo projects');
+      assert.equal(await page.locator('#photoDialog').count(), 1);
       await page.fill('#size-width', '175'); await page.locator('#size-width').press('Tab'); await settle();
       closeTo((await metrics()).width, 175, 'Existing photo dimensions remain editable');
     }
 
     assert.deepEqual(errors, [], 'No JavaScript errors');
     assert.deepEqual(network, [], 'No external network dependency');
-    console.log(JSON.stringify({ passed: true, offline: true, photoGenerationHidden: true, threeIndependentWorktops: true, bodyGeometryUnchanged: true, overhangMetrics: true, tableExtension: true, centerAndReset: true, invalidInputSafe: true, projectV4Roundtrip: true, legacyV3Import: true, legacyPhotoCompatible: fs.existsSync(legacyPhotoPath), persistence: true, mobileNoOverflow: true, screenshots: ['countertops-cabinet-desktop.png', 'countertops-bar-desktop.png', 'countertops-mobile.png'], errors }, null, 2));
+    console.log(JSON.stringify({ passed: true, offline: true, externalAILauncher: true, threeIndependentWorktops: true, bodyGeometryUnchanged: true, overhangMetrics: true, tableExtension: true, centerAndReset: true, invalidInputSafe: true, projectV4Roundtrip: true, legacyV3Import: true, legacyPhotoCompatible: fs.existsSync(legacyPhotoPath), persistence: true, mobileNoOverflow: true, screenshots: ['countertops-cabinet-desktop.png', 'countertops-bar-desktop.png', 'countertops-mobile.png'], errors }, null, 2));
   } catch (error) {
     if (page) await page.screenshot({ path: path.join(qaDir, 'countertops-failure.png'), fullPage: true }).catch(() => {});
     throw error;

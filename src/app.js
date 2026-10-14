@@ -2,7 +2,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const T = window.THREE;
-  const FEATURES = {photoImport:false};
+  const FEATURES = {photoImport:true};
   const PRESETS = {
     oak: { name: 'Stejar & alb cald', top: '#eeeae1', fronts: '#b98c60', body: '#b98c60', topFinish: 'stone', frontsFinish: 'wood', bodyFinish: 'wood' },
     cashmere: { name: 'Cașmir & nuc', top: '#866247', fronts: '#e7dfd2', body: '#ded6c9', topFinish: 'wood', frontsFinish: 'matte', bodyFinish: 'matte' },
@@ -11,7 +11,7 @@
   const MODELS = {
     custom: { title: 'Dulap vitrină', description: 'Depozitare generoasă. Detalii la vedere.', index: '01', builder: o => window.FurnitureCabinets.buildCustom(o) },
     bar: { title: 'Bar & masă extensibilă', description: 'Un loc de întâlnire. Mai mult spațiu, la nevoie.', index: '02', builder: o => window.FurnitureIslands.buildBar(o) },
-    photo: { title: 'Mobilier din fotografie', description: 'Volum simplificat din contur. Adâncime estimată.', index: '03', builder: o => window.FurniturePhotoModel.build({...o,photo:o.photo.descriptor}) }
+    photo: { title: 'Mobilier din fotografie', description: 'Interpretare 3D editabilă. Dimensiuni orientative.', index: '03', builder: o => window.FurniturePhotoModel.build({...o,photo:o.photo.descriptor}) }
   };
   const STORAGE = 'forma-furniture-v1';
   const APPEARANCE_PARAM = 'finisaje';
@@ -358,7 +358,7 @@
       $('sizeDetailFields').innerHTML=Object.keys(fields).filter(key=>!['width','depth','height'].includes(key)).map(fieldHTML).join('');
       $('size-details').hidden=state.model==='photo';
       $('sizeDetailsLabel').textContent=state.model==='custom'?'Blat și compartimentare':'Dimensiunile mesei';
-      $('size-note').textContent=state.model==='photo'?'Cotele reale nu pot fi măsurate din fotografie. Setează manual dimensiunile și adâncimea volumului.':state.model==='custom'?'Dimensiunile corpului. Compartimentele se adaptează proporțional; blatul se reglează separat mai jos.':'Dimensiunile corpului barului și ale mesei. Blaturile se reglează separat mai jos.';
+      $('size-note').textContent=state.model==='photo'?['Dimensiunile sunt estimări. Corectează-le folosind măsurători reale; piesele se adaptează proporțional.', ...(state.photo.descriptor.warnings || []).slice(0,2)].join(' '):state.model==='custom'?'Dimensiunile corpului. Compartimentele se adaptează proporțional; blatul se reglează separat mai jos.':'Dimensiunile corpului barului și ale mesei. Blaturile se reglează separat mai jos.';
       displayedSizeModel=state.model;
     }
     for(const key of Object.keys(fields)) {
@@ -409,16 +409,16 @@
     $('extensionValue').textContent = fmt(extensionLength())+' cm';
     $('dimensionsBtn').setAttribute('aria-pressed', state.dimensions);
     const info = MODELS[state.model];
-    $('modelTitle').textContent = info.title; $('modelDescription').textContent = info.description;
+    $('modelTitle').textContent = state.model==='photo'?state.photo.name:info.title; $('modelDescription').textContent = info.description;
     $('modelCategory').textContent = state.model==='photo'?'FOTOGRAFIA TA / MODEL APROXIMATIV':'COLECȚIA BUCĂTĂRIE / '+info.index;
-    document.querySelector('.model-badge>span:last-child').textContent=state.model==='photo'?'CONTUR TRANSFORMAT ÎN VOLUM':'MODEL 3D INTERACTIV';
+    document.querySelector('.model-badge>span:last-child').textContent=state.model==='photo'?(state.photo.descriptor.version===2?'GENERAT CU AI · MODEL EDITABIL':'MODEL IMPORTAT DIN FOTOGRAFIE'):'MODEL 3D INTERACTIV';
     $('viewport').setAttribute('aria-label', info.title + '. Model 3D. Trage pentru rotire, derulează pentru zoom. Săgeți pentru rotire, plus și minus pentru zoom.');
     syncSizeControls();
     syncWorktopControls();
     syncShareLink();
   }
   function syncShareLink() {
-    // Legacy photo models remain shareable through exported project files.
+    // Photo models remain shareable through exported project files.
     if (shareLinkMode === 'configuration' && state.model === 'photo') {
       shareLinkMode = null;
       const url = new URL(window.location.href); url.searchParams.delete(CONFIGURATION_PARAM);

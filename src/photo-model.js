@@ -1,6 +1,6 @@
-/* Photo-derived, editable silhouette extrusion. Centimetres; front faces +Z.
- * This is a closed 3D volume, not a plane carrying the uploaded photograph.
- * A single silhouette cannot reveal hidden construction or physical depth.
+/* Editable furniture from validated AI parts, plus legacy silhouette projects.
+ * Centimetres; positive Y is up and front faces +Z. Models contain closed 3D
+ * geometry, never a plane carrying the uploaded photograph or generated code.
  */
 (function () {
   'use strict';
@@ -12,6 +12,12 @@
   const validColor = value => typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
 
   function validateDescriptor(value) {
+    if (isRecord(value) && value.version === 2) {
+      if (!globalThis.FurnitureAI) throw new Error('Validatorul pentru modelele AI nu este disponibil.');
+      const descriptor = globalThis.FurnitureAI.validateDescriptor(value);
+      if (descriptor.kind !== 'furniture') throw new Error(descriptor.reason || 'AI-ul nu a identificat un obiect de mobilier.');
+      return descriptor;
+    }
     if (!isRecord(value) || value.version !== 1 || !isRecord(value.grid)) {
       throw new Error('Modelul din imagine are un format necunoscut.');
     }
@@ -101,6 +107,7 @@
     const T = window.THREE;
     if (!T) throw new Error('Motorul de vizualizare 3D nu este disponibil.');
     const o = options || {}, photo = validateDescriptor(o.photo);
+    if (photo.version === 2) return buildAIParts(T, o, photo);
     const size = Object.assign({ width: 100, height: Math.max(20, Math.min(300, 100 / photo.aspect)), depth: 45 }, o.size);
     const limits = { width: [20, 400], height: [20, 300], depth: [10, 180] };
     for (const key of Object.keys(limits)) {
@@ -244,6 +251,68 @@
       mesh.castShadow = true; mesh.receiveShadow = true;
       group.add(mesh);
     }
+    return { group, width: size.width, height: size.height, depth: size.depth };
+  }
+
+  function buildAIParts(T, options, photo) {
+    const size = { ...photo.size, ...options.size };
+    const limits = { width: [20, 400], height: [20, 300], depth: [10, 180] };
+    for (const [key, range] of Object.entries(limits)) {
+      if (!finite(size[key]) || size[key] < range[0] || size[key] > range[1]) {
+        throw new Error('Dimensiune invalidă pentru modelul AI: ' + key + '.');
+      }
+    }
+    const group = new T.Group(), parts = new T.Group();
+    group.name = 'photo'; parts.name = 'photo-parts'; group.add(parts);
+    const materials = new Map(), roleCounts = {};
+    for (const part of photo.parts) {
+      const role = part.role;
+      let material = materials.get(role);
+      if (!material) {
+        const hardware = role === 'hardware';
+        const finish = !hardware && ['matte', 'wood', 'stone'].includes(options[role + 'Finish']) ? options[role + 'Finish'] : 'matte';
+        const params = {
+          color: validColor(options[role]) ? options[role] : (hardware ? '#4d5148' : photo.colors[role]),
+          roughness: hardware ? 0.32 : finish === 'stone' ? 0.4 : 0.64,
+          metalness: hardware ? 0.72 : 0.02
+        };
+        const map = finishTexture(T, finish);
+        if (map) params.map = map;
+        material = new T.MeshStandardMaterial(params);
+        material.name = 'photo-material-' + role;
+        materials.set(role, material);
+      }
+      const dimensions = [part.size.x * photo.size.width, part.size.y * photo.size.height, part.size.z * photo.size.depth];
+      const geometry = part.shape === 'cylinder'
+        ? new T.CylinderGeometry(0.5, 0.5, 1, 24, 1, false)
+        : new T.BoxGeometry(1, 1, 1);
+      // A cylinder's Y axis is its length; X/Z set its two diameters.
+      geometry.scale(...dimensions);
+      const rotation = new T.Euler(...['x', 'y', 'z'].map(axis => T.MathUtils.degToRad(part.rotation[axis])));
+      geometry.applyMatrix4(new T.Matrix4().makeRotationFromEuler(rotation));
+      geometry.translate(part.position.x * photo.size.width, part.position.y * photo.size.height, part.position.z * photo.size.depth);
+      const mesh = new T.Mesh(geometry, material);
+      roleCounts[role] = (roleCounts[role] || 0) + 1;
+      mesh.name = 'photo-' + role + (roleCounts[role] > 1 ? '-' + roleCounts[role] : '');
+      mesh.userData = { role, partName: part.name, shape: part.shape };
+      mesh.castShadow = true; mesh.receiveShadow = true;
+      parts.add(mesh);
+    }
+    // AI coordinates may include overhangs or rotated parts. Fit actual geometry,
+    // so the user's dimensions describe the entire object, not an assumed box.
+    parts.updateMatrixWorld(true);
+    const bounds = new T.Box3().setFromObject(parts, true);
+    const extent = bounds.getSize(new T.Vector3());
+    const center = bounds.getCenter(new T.Vector3());
+    parts.position.set(-center.x, -bounds.min.y, -center.z);
+    group.scale.set(size.width / extent.x, size.height / extent.y, size.depth / extent.z);
+    group.userData = {
+      modelType: 'photo', technique: 'ai-parts', dimensions: { ...size },
+      estimatedSize: { ...photo.size }, partCount: photo.parts.length,
+      depthEstimated: true, warnings: photo.warnings.slice(),
+      note: 'Model 3D aproximativ din componente generate de AI. Dimensiunile și părțile ascunse sunt estimate din fotografie.'
+    };
+    group.updateMatrixWorld(true);
     return { group, width: size.width, height: size.height, depth: size.depth };
   }
 
