@@ -1,3 +1,11 @@
+.bar-variant-control{margin-top:15px;padding-top:14px;border-top:1px solid var(--line)}
+.bar-variant-label{display:block;font-size:10px;color:var(--muted);margin-bottom:8px}
+.bar-variant-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:4px;background:#f5f7f0;border:1px solid var(--line);border-radius:8px}
+.bar-variant-options button{min-width:0;min-height:37px;padding:8px 5px;border:1px solid transparent;border-radius:5px;font-size:10px;font-weight:550;color:#78876b;transition:background .15s,color .15s,border-color .15s}
+.bar-variant-options button:hover{background:#e8eede;color:#435437}
+.bar-variant-options button[aria-pressed="true"]{background:#fff;border-color:#cbd5c2;color:#435437;box-shadow:0 1px 3px #35432c0c}
+.bar-variant-options button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.bar-variant-control .size-note{margin-top:10px}
 .size-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
 .size-field{display:block;min-width:0;font-size:9px;color:#718068}
 .size-field>span:first-child{display:block;min-height:27px;line-height:1.3}
@@ -27,4 +35,4 @@
 .worktop-overhang strong{display:block;font-size:11px;font-weight:500;color:#586d4a;margin-top:2px}
 .worktop-overhang>small{display:block;font-size:8px;color:#9ba48f;margin-top:8px}
 @media(max-width:760px){.worktop-choice{font-size:10px}.worktop-choice select{font-size:13px;padding:11px}.worktop-grid .size-field>small{font-size:9px}.worktop-overhang>span{font-size:10px}.worktop-overhang>div{font-size:9px}.worktop-overhang strong{font-size:13px}}
-@media(max-width:760px){.size-field{font-size:10px}.size-field>span:first-child{min-height:23px}.dimension-input{padding:10px}.dimension-input input{font-size:16px}.dimension-input>span{font-size:10px}.size-details summary{font-size:11px}.size-note{font-size:10px}.size-grid{gap:12px}}
+@media(max-width:760px){.bar-variant-label{font-size:11px}.bar-variant-options button{min-height:42px;font-size:12px}.size-field{font-size:10px}.size-field>span:first-child{min-height:23px}.dimension-input{padding:10px}.dimension-input input{font-size:16px}.dimension-input>span{font-size:10px}.size-details summary{font-size:11px}.size-note{font-size:10px}.size-grid{gap:12px}}

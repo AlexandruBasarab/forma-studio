@@ -21,10 +21,18 @@
 <main class="workspace">
 <aside class="sidebar" aria-label="Configurarea mobilierului">
   <div class="sidebar-intro"><div class="eyebrow">DE LA IDEE LA FORMĂ</div><h1>Compune-ți mobilierul.</h1><p>Alege un model. Găsește combinația ta.</p></div>
-  <section class="control-section"><div class="section-heading"><h2><span>01</span> Modelul</h2><small>2 variante</small></div>
+  <section class="control-section"><div class="section-heading"><h2><span>01</span> Modelul</h2><small>2 modele</small></div>
   <div class="model-grid">
     <button class="model-card active" data-model="custom" aria-pressed="true"><div class="model-illustration"><svg viewBox="0 0 130 82"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M26 74V7h67v67ZM26 48h67M26 59h67M59 48v26M31 7v31h57V7M31 24h57M53 7v31M74 7v31M35 38v10M93 15h10m-10 8h10m-10 8h10m-10 8h10m-10 9h10m-10 8h10m-10 9h10"/><path d="M30 47h64" stroke-width="4"/></g></svg></div><strong>Dulap vitrină</strong><small>200 × 50 × 215 cm</small><span class="selected-dot"></span></button>
-    <button class="model-card" data-model="bar" aria-pressed="false"><div class="model-illustration"><svg viewBox="0 0 130 82"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M68 25h42v47H68ZM68 36h42M89 36v36M17 39h51M19 42v30h17V42M19 55h17m-17 10h17"/><path d="M66 23h46M15 39h54" stroke-width="4"/><path d="m74 29 7 0m17 0h7"/></g></svg></div><strong>Bar & masă</strong><small>110–190 × 110 × 110 cm</small><span class="selected-dot"></span></button>
+    <button class="model-card" data-model="bar" aria-pressed="false"><div class="model-illustration"><svg viewBox="0 0 130 82"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M68 25h42v47H68ZM68 36h42M89 36v36M17 39h51M19 42v30h17V42M19 55h17m-17 10h17"/><path d="M66 23h46M15 39h54" stroke-width="4"/><path d="m74 29 7 0m17 0h7"/></g></svg></div><strong>Bar / Insulă & masă</strong><small>110–190 × 110 × 110 cm</small><span class="selected-dot"></span></button>
+  </div>
+  <div id="barVariantControl" class="bar-variant-control" hidden>
+    <span class="bar-variant-label">Varianta ansamblului</span>
+    <div class="bar-variant-options" role="group" aria-label="Varianta barului și mesei" aria-describedby="barVariantNote">
+      <button type="button" data-bar-variant="bar" aria-pressed="true">Bar & masă</button>
+      <button type="button" data-bar-variant="island" aria-pressed="false">Insulă & masă</button>
+    </div>
+    <p id="barVariantNote" class="size-note">Bar de 110 cm, cu suport cu rafturi. Insulă de 90 cm, cu picioare simple și retracție de până la 70 cm.</p>
   </div></section>
   <section class="control-section" id="dimensionSettings"><div class="section-heading"><h2><span>02</span> Dimensiuni</h2><button class="text-link" id="resetDimensions" title="Revino la dimensiunile din schiță">↺ Originale</button></div>
     <div class="size-grid" id="sizeBasicFields"></div>
@@ -56,10 +64,10 @@
   <div class="material-row"><label class="color-swatch" for="frontsUpperColor"><input type="color" id="frontsUpperColor" value="#87927b" aria-label="Culoare Fronturi / Uși — Sus" aria-describedby="frontZonesHelp"></label><div class="material-name"><label for="frontsUpperColor">Fronturi / Uși — Sus</label><input class="hex-input" id="frontsUpperHex" value="#87927B" maxlength="7" aria-label="Cod HEX fronturi sus" spellcheck="false"></div><select id="frontsUpperFinish" aria-label="Finisaj fronturi sus"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
   <div class="material-row"><label class="color-swatch" for="frontsLowerColor"><input type="color" id="frontsLowerColor" value="#87927b" aria-label="Culoare Fronturi / Uși — Jos" aria-describedby="frontZonesHelp"></label><div class="material-name"><label for="frontsLowerColor">Fronturi / Uși — Jos</label><input class="hex-input" id="frontsLowerHex" value="#87927B" maxlength="7" aria-label="Cod HEX fronturi jos" spellcheck="false"></div><select id="frontsLowerFinish" aria-label="Finisaj fronturi jos"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
   <div class="material-row"><label class="color-swatch" for="bodyColor"><input type="color" id="bodyColor" value="#eff0e7" aria-label="Culoare Carcasă și Corp"></label><div class="material-name"><label for="bodyColor">Carcasă & Corp</label><input class="hex-input" id="bodyHex" value="#EFF0E7" maxlength="7" aria-label="Cod HEX carcasă" spellcheck="false"></div><select id="bodyFinish" aria-label="Finisaj carcasă"><option value="matte">Mat</option><option value="wood">Lemn</option><option value="stone">Piatră</option></select></div>
-  <p id="frontZonesHelp" class="size-note">Sus / jos: ușile dulapului; sertarul / ușile barului. La modelele AI, fronturile sunt grupate după înălțime.</p>
+  <p id="frontZonesHelp" class="size-note">Sus / jos: ușile dulapului; sertarul / ușile barului; rândul de sertare de sus / fronturile de jos ale insulei. La modelele AI, fronturile sunt grupate după înălțime.</p>
   </section>
   <section class="control-section"><div class="section-heading"><h2><span>06</span> Detalii & funcții</h2></div>
-    <div id="extensionControl" class="extension-control" hidden><div class="range-label"><label for="extension">Extensia mesei</label><output id="extensionValue" for="extension">110 cm</output></div><input id="extension" type="range" min="0" max="100" value="100"><div class="range-ends"><span>Retrasă</span><span>Extinsă</span></div></div>
+    <div id="extensionControl" class="extension-control" hidden><div class="range-label"><label for="extension">Extensia mesei</label><output id="extensionValue" for="extension">110 cm</output></div><input id="extension" type="range" min="0" max="100" value="100" aria-describedby="extensionNote"><div class="range-ends"><span>Retrasă</span><span>Extinsă</span></div><p id="extensionNote" class="size-note" hidden>Retracție de până la 70 cm în corpul insulei.</p></div>
     <label class="toggle-row" for="doorsOpen"><span>Deschide ușile<small>Explorează spațiul de depozitare</small></span><input type="checkbox" id="doorsOpen" role="switch"><span class="switch"></span></label>
     <label class="toggle-row" for="glass" id="glassControl"><span>Fronturi din sticlă<small>Culoarea se aplică ramelor</small></span><input type="checkbox" id="glass" checked role="switch"><span class="switch"></span></label>
     <button id="resetBtn" class="reset-button">↺ &nbsp; Resetează configurația</button>

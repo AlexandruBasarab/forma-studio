@@ -98,21 +98,21 @@ const migrated = { top: legacyAppearance.top, frontsUpper: legacyAppearance.fron
 
     const expected = await state();
     const savePromise = page.waitForEvent('download'); await page.click('#saveBtn');
-    const projectPath = path.join(QA, 'fronts-project-v5.json'); await (await savePromise).saveAs(projectPath);
+    const projectPath = path.join(QA, 'fronts-project-v6.json'); await (await savePromise).saveAs(projectPath);
     const saved = JSON.parse(fs.readFileSync(projectPath));
-    assert.equal(saved.version, 5);
+    assert.equal(saved.version, 6);
     assert.deepEqual(saved.configuration, expected);
     assert(!('fronts' in saved.configuration) && !('frontsFinish' in saved.configuration), 'New projects contain independent front zones only');
     await page.click('[data-palette="cashmere"]'); await settle();
     await page.setInputFiles('#projectFile', projectPath); await settle();
-    assert.deepEqual(await state(), expected, 'Version 5 saves both independent colors and finishes');
+    assert.deepEqual(await state(), expected, 'Version 6 saves both independent colors and finishes');
     await page.reload(); await ready();
     assert.deepEqual(await state(), expected, 'Local persistence retains both front zones');
     await assertMaterials();
 
     await page.click('#shareAppearanceBtn');
     const url = await page.inputValue('#appearanceShareUrl'), payload = decode(url);
-    assert.equal(payload.v, 2);
+    assert.equal(payload.v, 3);
     assert.deepEqual(colors(payload), colors(expected));
     for (const role of ROLES) assert((await page.locator('#share-' + role + '-value').innerText()).includes(expected[role].toUpperCase()));
     await page.click('#closeAppearanceShare');
@@ -126,7 +126,7 @@ const migrated = { top: legacyAppearance.top, frontsUpper: legacyAppearance.fron
 
     const incomplete = { ...payload, top: '#ff0000' }; delete incomplete.frontsLowerFinish;
     await page.goto(link(incomplete)); await ready();
-    assert.deepEqual(await state(), expected, 'Incomplete v2 shared data is rejected atomically');
+    assert.deepEqual(await state(), expected, 'Incomplete v3 shared data is rejected atomically');
     const legacyFull = { ...payload, v: 1, ...legacyAppearance };
     for (const key of ['frontsUpper', 'frontsLower', 'frontsUpperFinish', 'frontsLowerFinish']) delete legacyFull[key];
     await page.goto(link(legacyFull)); await ready();
@@ -177,7 +177,7 @@ const migrated = { top: legacyAppearance.top, frontsUpper: legacyAppearance.fron
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await page.screenshot({ path: path.join(QA, 'fronts-pickers-mobile.png') });
     assert.deepEqual(errors, []);
-    console.log(JSON.stringify({ passed: true, independentUpperLowerMaterials: true, glassFramesAndSolidDoors: true, barDrawersAndBothDoorFaces: true, projectV5: true, sharedV2: true, legacyV1Share: true, legacyV4ProjectAndLocalMigration: true, malformedV2Atomic: true, presetsAndReset: true, png: true, fourMobileSwatches: true, errors }, null, 2));
+    console.log(JSON.stringify({ passed: true, independentUpperLowerMaterials: true, glassFramesAndSolidDoors: true, barDrawersAndBothDoorFaces: true, projectV6: true, sharedV3: true, legacyV1Share: true, legacyV4ProjectAndLocalMigration: true, malformedV3Atomic: true, presetsAndReset: true, png: true, fourMobileSwatches: true, errors }, null, 2));
   } catch (error) {
     if (page && !page.isClosed()) await page.screenshot({ path: path.join(QA, 'fronts-failure.png'), fullPage: true }).catch(() => {});
     throw error;

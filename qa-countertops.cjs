@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 
 const qaDir = path.join(__dirname, 'qa');
 const zeroTop = () => ({ widthDelta: 0, depthDelta: 0, offsetX: 0, offsetZ: 0 });
-const DEFAULT_WORKTOPS = { cabinet: zeroTop(), bar: zeroTop(), table: zeroTop() };
+const DEFAULT_WORKTOPS = { cabinet: zeroTop(), bar: zeroTop(), table: zeroTop(), island: { ...zeroTop(), offsetZ: 1 }, islandTable: zeroTop() };
 const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(actual - expected) <= tolerance, `${label}: ${actual} should equal ${expected}`);
 
 (async () => {
@@ -173,15 +173,15 @@ const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(
     await page.fill('#topHex', '#bb3355'); await page.locator('#topHex').press('Tab'); await settle();
     const savedConfiguration = await state();
     const downloadPromise = page.waitForEvent('download'); await page.click('#saveBtn');
-    const download = await downloadPromise, projectPath = path.join(qaDir, 'countertops-project-v5.json');
+    const download = await downloadPromise, projectPath = path.join(qaDir, 'countertops-project-v6.json');
     await download.saveAs(projectPath);
     const saved = JSON.parse(fs.readFileSync(projectPath, 'utf8'));
-    assert.equal(saved.version, 5);
+    assert.equal(saved.version, 6);
     assert.deepEqual(saved.configuration.worktops, savedConfiguration.worktops);
     await page.click('#resetWorktop'); await settle();
     await page.setInputFiles('#projectFile', projectPath);
     await page.waitForFunction(() => FormaConfigurator.getState().worktops.table.widthDelta === 30); await settle();
-    assert.deepEqual((await state()).worktops, savedConfiguration.worktops, 'Version 5 project roundtrip');
+    assert.deepEqual((await state()).worktops, savedConfiguration.worktops, 'Version 6 project roundtrip');
     assert.equal((await state()).top, '#bb3355', 'Project roundtrip preserves finish color');
     await page.reload(); await page.waitForFunction(() => window.FormaConfigurator && document.querySelector('#loading').hidden);
     assert.deepEqual((await state()).worktops, savedConfiguration.worktops, 'Local storage roundtrip');
@@ -221,7 +221,7 @@ const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(
 
     assert.deepEqual(errors, [], 'No JavaScript errors');
     assert.deepEqual(network, [], 'No external network dependency');
-    console.log(JSON.stringify({ passed: true, offline: true, externalAILauncher: true, threeIndependentWorktops: true, bodyGeometryUnchanged: true, overhangMetrics: true, tableExtension: true, centerAndReset: true, invalidInputSafe: true, projectV4Roundtrip: true, legacyV3Import: true, legacyPhotoCompatible: fs.existsSync(legacyPhotoPath), persistence: true, mobileNoOverflow: true, screenshots: ['countertops-cabinet-desktop.png', 'countertops-bar-desktop.png', 'countertops-mobile.png'], errors }, null, 2));
+    console.log(JSON.stringify({ passed: true, offline: true, externalAILauncher: true, threeIndependentWorktops: true, bodyGeometryUnchanged: true, overhangMetrics: true, tableExtension: true, centerAndReset: true, invalidInputSafe: true, projectV6Roundtrip: true, legacyV3Import: true, legacyPhotoCompatible: fs.existsSync(legacyPhotoPath), persistence: true, mobileNoOverflow: true, screenshots: ['countertops-cabinet-desktop.png', 'countertops-bar-desktop.png', 'countertops-mobile.png'], errors }, null, 2));
   } catch (error) {
     if (page) await page.screenshot({ path: path.join(qaDir, 'countertops-failure.png'), fullPage: true }).catch(() => {});
     throw error;

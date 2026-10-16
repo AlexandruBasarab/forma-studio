@@ -50,6 +50,10 @@ html[data-theme="dark"] .palette.active { background: #263824; border-color: #68
 html[data-theme="dark"] .model-illustration,
 html[data-theme="dark"] .palette-check { color: #b3c79f; }
 html[data-theme="dark"] .model-card small { color: #acb7a3; }
+html[data-theme="dark"] .bar-variant-options { background: var(--theme-raised); }
+html[data-theme="dark"] .bar-variant-options button { color: var(--theme-soft); }
+html[data-theme="dark"] .bar-variant-options button:hover { background: var(--theme-hover); color: var(--ink); }
+html[data-theme="dark"] .bar-variant-options button[aria-pressed="true"] { background: var(--theme-selected); border-color: #829b70; color: var(--ink); box-shadow: none; }
 html[data-theme="dark"] .active .selected-dot { background: #bfd7a9; }
 html[data-theme="dark"] .color-swatch,
 html[data-theme="dark"] .palette-colors i,

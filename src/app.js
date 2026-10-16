@@ -10,7 +10,7 @@
   };
   const MODELS = {
     custom: { title: 'Dulap vitrină', description: 'Depozitare generoasă. Detalii la vedere.', index: '01', builder: o => window.FurnitureCabinets.buildCustom(o) },
-    bar: { title: 'Bar & masă extensibilă', description: 'Un loc de întâlnire. Mai mult spațiu, la nevoie.', index: '02', builder: o => window.FurnitureIslands.buildBar(o) },
+    bar: { title: 'Bar & masă extensibilă', description: 'Un loc de întâlnire. Mai mult spațiu, la nevoie.', index: '02', builder: o => o.barVariant==='island'?window.FurnitureIslands.buildIsland(o):window.FurnitureIslands.buildBar(o) },
     photo: { title: 'Mobilier din fotografie', description: 'Interpretare 3D editabilă. Dimensiuni orientative.', index: '03', builder: o => window.FurniturePhotoModel.build({...o,photo:o.photo.descriptor}) }
   };
   const STORAGE = 'forma-furniture-v1';
@@ -28,11 +28,11 @@
     }
     return payload;
   }
-  function decodeSharedData(token, maxLength) {
+  function decodeSharedData(token, maxLength, versions = [1,2]) {
     if (!token || token.length > maxLength || !/^[A-Za-z0-9_-]+$/.test(token) || token.length % 4 === 1) throw new Error('Link invalid.');
     const json = atob(token.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(token.length/4)*4,'='));
     const data = JSON.parse(json);
-    if (!data || typeof data !== 'object' || Array.isArray(data) || ![1,2].includes(data.v)) throw new Error('Versiune necunoscută.');
+    if (!data || typeof data !== 'object' || Array.isArray(data) || !versions.includes(data.v)) throw new Error('Versiune necunoscută.');
     return data;
   }
   function validateAppearance(data, layout = 'auto') {
@@ -56,13 +56,13 @@
   }
   function configurationPayload() {
     return {
-      ...appearancePayload(), model:state.model,
-      sizes:{custom:state.sizes.custom,bar:state.sizes.bar}, worktops:state.worktops,
+      ...appearancePayload(), v:3, model:state.model, barVariant:state.barVariant,
+      sizes:{custom:state.sizes.custom,bar:state.sizes.bar,island:state.sizes.island}, worktops:state.worktops,
       extension:state.extension, glass:state.glass, doorsOpen:state.doorsOpen, dimensions:state.dimensions
     };
   }
   function decodeConfiguration(token) {
-    const data = decodeSharedData(token,8192);
+    const data = decodeSharedData(token,8192,[1,2,3]);
     if (!['custom','bar'].includes(data.model)) throw new Error('Model necunoscut.');
     for (const key of ['glass','doorsOpen','dimensions']) {
       if (typeof data[key] !== 'boolean') throw new Error('Opțiune invalidă.');
@@ -70,7 +70,7 @@
     if (!data.sizes || typeof data.sizes !== 'object' || Array.isArray(data.sizes) || !data.sizes.custom || !data.sizes.bar || !data.worktops || typeof data.worktops !== 'object' || Array.isArray(data.worktops)) throw new Error('Lipsesc dimensiunile sau blaturile.');
     // Reuse project validation, requiring every shared dimension and top setting.
     // Photo data is local-only and never accepted from a compact configuration link.
-    return validate({...data,...validateAppearance(data,data.v===1?'legacy':'split'),photo:null,sizes:{custom:data.sizes.custom,bar:data.sizes.bar}},'split');
+    return validate({...data,...validateAppearance(data,data.v===1?'legacy':'split'),barVariant:data.v<3?'bar':data.barVariant,photo:null,sizes:{custom:data.sizes.custom,bar:data.sizes.bar,island:data.v===3?data.sizes.island:undefined}},'split',data.v===3);
   }
   function shareUrl(mode = shareLinkMode || 'configuration') {
     const url = new URL(window.location.href);
@@ -99,6 +99,15 @@
       tableDepth: {label:'Adâncime masă', min:40, max:130, value:90},
       tableHeight: {label:'Înălțime masă', min:60, max:100, value:76}
     },
+    island: {
+      width: {label:'Lățime corp', min:50, max:160, value:80},
+      depth: {label:'Adâncime corp', min:50, max:130, value:90},
+      height: {label:'Înălțime insulă', min:85, max:120, value:90},
+      tableLength: {label:'Lungime masă max.', min:40, max:180, value:110},
+      tableDepth: {label:'Adâncime masă', min:40, max:130, value:90},
+      tableHeight: {label:'Înălțime masă', min:60, max:100, value:76},
+      tableRetraction: {label:'Retracție în corp', min:0, max:140, value:70}
+    },
     photo: {
       width: {label:'Lățime', min:20, max:400, value:100},
       depth: {label:'Adâncime', min:10, max:180, value:50},
@@ -106,20 +115,26 @@
     }
   };
   function defaultSize(model) {return Object.fromEntries(Object.entries(SIZE_FIELDS[model]).map(([key,field])=>[key,field.value]));}
-  const defaultWorktop=()=>({widthDelta:0,depthDelta:0,offsetX:0,offsetZ:0});
-  const defaults = () => ({ model: 'custom', palette: 'sage', ...PRESETS.sage, extension: 1, glass: true, doorsOpen: false, dimensions: false, photo:null, sizes:{custom:defaultSize('custom'),bar:defaultSize('bar'),photo:defaultSize('photo')},worktops:{cabinet:defaultWorktop(),bar:defaultWorktop(),table:defaultWorktop()} });
+  const WORKTOP_KEYS = ['cabinet','bar','table','island','islandTable'];
+  const defaultWorktop=key=>({widthDelta:0,depthDelta:0,offsetX:0,offsetZ:key==='island'?1:0});
+  const defaults = () => ({ model: 'custom', barVariant:'bar', palette: 'sage', ...PRESETS.sage, extension: 1, glass: true, doorsOpen: false, dimensions: false, photo:null, sizes:Object.fromEntries(Object.keys(SIZE_FIELDS).map(key=>[key,defaultSize(key)])),worktops:Object.fromEntries(WORKTOP_KEYS.map(key=>[key,defaultWorktop(key)])) });
+  function activeSizeKey(){return state.model==='bar'?state.barVariant:state.model;}
+  function modelInfo(){return state.model==='bar'&&state.barVariant==='island'?{...MODELS.bar,title:'Insulă & masă extensibilă',description:'Sertare la îndemână. O masă care se retrage în insulă.'}:MODELS[state.model];}
+  function activeWorktopKeys(){return state.model==='custom'?['cabinet']:state.model==='bar'?(state.barVariant==='island'?['island','islandTable']:['bar','table']):[];}
   const WORKTOP_LIMITS={width:{min:20,max:450},depth:{min:10,max:220},offsetX:{min:-100,max:100},offsetZ:{min:-100,max:100}};
   function baseWorktop(key) {
     if(key==='cabinet')return {width:state.sizes.custom.width,depth:state.sizes.custom.depth};
     if(key==='bar')return {width:state.sizes.bar.width,depth:state.sizes.bar.depth+20};
-    return {width:extensionLength()+0.5,depth:state.sizes.bar.tableDepth};
+    if(key==='island')return {width:state.sizes.island.width+2,depth:state.sizes.island.depth+2};
+    if(key==='islandTable')return {width:extensionLength('island'),depth:state.sizes.island.tableDepth};
+    return {width:extensionLength('bar')+0.5,depth:state.sizes.bar.tableDepth};
   }
   function resolvedWorktop(key) {
     const base=baseWorktop(key),saved=state.worktops[key];
     return {width:Math.round(Math.min(450,Math.max(20,base.width+saved.widthDelta))*10)/10,depth:Math.round(Math.min(220,Math.max(10,base.depth+saved.depthDelta))*10)/10,offsetX:saved.offsetX,offsetZ:saved.offsetZ};
   }
-  function resolvedWorktops(){return Object.fromEntries(['cabinet','bar','table'].map(key=>[key,resolvedWorktop(key)]));}
-  function resetModelWorktops(){for(const key of state.model==='custom'?['cabinet']:state.model==='bar'?['bar','table']:[])state.worktops[key]=defaultWorktop();}
+  function resolvedWorktops(){return {cabinet:resolvedWorktop('cabinet'),bar:resolvedWorktop(state.barVariant==='island'?'island':'bar'),table:resolvedWorktop(state.barVariant==='island'?'islandTable':'table')};}
+  function resetModelWorktops(){for(const key of activeWorktopKeys())state.worktops[key]=defaultWorktop(key);}
   function sizeLimit(model,key,size) {
     let max=SIZE_FIELDS[model][key].max;
     if(model==='custom') {
@@ -128,7 +143,8 @@
       if(key==='upperDepth')max=Math.min(max,size.depth);
     } else {
       if(key==='tableDepth')max=Math.min(max,size.depth);
-      if(key==='tableHeight')max=Math.min(max,size.height-25);
+      if(key==='tableHeight')max=Math.min(max,size.height-(model==='island'?12:25));
+      if(key==='tableRetraction')max=Math.min(max,size.width-10,size.tableLength-20);
     }
     return {min:SIZE_FIELDS[model][key].min,max:Math.round(max*10)/10};
   }
@@ -141,10 +157,15 @@
     }
     return next;
   }
-  function validate(data, appearanceLayout = 'auto') {
+  function validate(data, appearanceLayout = 'auto', requireIsland = false) {
     if (!data || typeof data !== 'object' || !Object.hasOwn(MODELS, data.model)) throw new Error('Proiectul nu conține un model compatibil.');
     const result = defaults();
     result.model = data.model;
+    if(data.barVariant!==undefined||requireIsland) {
+      if(!['bar','island'].includes(data.barVariant))throw new Error('Varianta barului sau insulei este invalidă.');
+      result.barVariant=data.barVariant;
+    }
+    if((requireIsland||result.barVariant==='island')&&(!data.sizes||!data.sizes.island||!data.worktops||!data.worktops.island||!data.worktops.islandTable))throw new Error('Lipsesc dimensiunile sau blaturile insulei.');
     if(data.photo!=null)result.photo=validatePhoto(data.photo);
     if(data.model==='photo'&&!result.photo)throw new Error('Proiectul nu conține modelul generat din fotografie.');
     Object.assign(result,validateAppearance(data,appearanceLayout));
@@ -155,6 +176,7 @@
       if(!data.sizes || typeof data.sizes!=='object')throw new Error('Dimensiunile proiectului sunt invalide.');
       for(const model of Object.keys(SIZE_FIELDS)) {
         const values=data.sizes[model];
+        if(model==='island'&&values===undefined&&!requireIsland&&result.barVariant!=='island')continue;
         if(model==='photo'&&values===undefined&&data.model!=='photo')continue;
         if(!values || typeof values!=='object')throw new Error('Lipsesc dimensiunile unui model.');
         for(const key of Object.keys(SIZE_FIELDS[model])) {
@@ -166,7 +188,8 @@
     }
     if(data.worktops!==undefined) {
       if(!data.worktops||typeof data.worktops!=='object')throw new Error('Setările blaturilor sunt invalide.');
-      for(const key of ['cabinet','bar','table']) {
+      for(const key of WORKTOP_KEYS) {
+        if((key==='island'||key==='islandTable')&&data.worktops[key]===undefined&&!requireIsland&&result.barVariant!=='island')continue;
         const values=data.worktops[key];if(!values||typeof values!=='object')throw new Error('Lipsesc setările unui blat.');
         for(const field of ['widthDelta','depthDelta','offsetX','offsetZ']) {
           const value=values[field],limit=field==='widthDelta'?450:field==='depthDelta'?220:100;
@@ -353,8 +376,8 @@
     const p=state.sizes.photo;card.querySelector('.photo-card-size').textContent=fmt(p.width)+' × '+fmt(p.depth)+' × '+fmt(p.height)+' cm';
   }
   function syncSizeControls() {
-    const size=state.sizes[state.model],fields=SIZE_FIELDS[state.model];
-    if(displayedSizeModel!==state.model) {
+    const sizeKey=activeSizeKey(),size=state.sizes[sizeKey],fields=SIZE_FIELDS[sizeKey];
+    if(displayedSizeModel!==sizeKey) {
       function fieldHTML(key) {
         return '<label class="size-field" for="size-'+key+'"><span>'+fields[key].label+'</span><span class="dimension-input"><input type="number" inputmode="decimal" id="size-'+key+'" data-size="'+key+'" step="0.1" aria-describedby="size-note"><span>cm</span></span></label>';
       }
@@ -362,41 +385,47 @@
       $('sizeDetailFields').innerHTML=Object.keys(fields).filter(key=>!['width','depth','height'].includes(key)).map(fieldHTML).join('');
       $('size-details').hidden=state.model==='photo';
       $('sizeDetailsLabel').textContent=state.model==='custom'?'Blat și compartimentare':'Dimensiunile mesei';
-      $('size-note').textContent=state.model==='photo'?['Dimensiunile sunt estimări. Corectează-le folosind măsurători reale; piesele se adaptează proporțional.', ...(state.photo.descriptor.warnings || []).slice(0,2)].join(' '):state.model==='custom'?'Dimensiunile corpului. Compartimentele se adaptează proporțional; blatul se reglează separat mai jos.':'Dimensiunile corpului barului și ale mesei. Blaturile se reglează separat mai jos.';
-      displayedSizeModel=state.model;
+      $('size-note').textContent=state.model==='photo'?['Dimensiunile sunt estimări. Corectează-le folosind măsurători reale; piesele se adaptează proporțional.', ...(state.photo.descriptor.warnings || []).slice(0,2)].join(' '):state.model==='custom'?'Dimensiunile corpului. Compartimentele se adaptează proporțional; blatul se reglează separat mai jos.':sizeKey==='island'?'Dimensiunile insulei și ale mesei. Retracția se adaptează la spațiul din corp; blaturile se reglează separat mai jos.':'Dimensiunile corpului barului și ale mesei. Blaturile se reglează separat mai jos.';
+      displayedSizeModel=sizeKey;
     }
     for(const key of Object.keys(fields)) {
-      const input=$('size-'+key),limits=sizeLimit(state.model,key,size);
+      const input=$('size-'+key),limits=sizeLimit(sizeKey,key,size);
       input.min=limits.min;input.max=limits.max;input.title=fmt(limits.min)+'–'+fmt(limits.max)+' cm';
       if(document.activeElement!==input)input.value=size[key];
     }
-    const c=state.sizes.custom,b=state.sizes.bar;
+    const c=state.sizes.custom,b=state.sizes[state.barVariant];
     document.querySelector('[data-model="custom"] small').textContent='Corp '+fmt(c.width)+' × '+fmt(c.depth)+' × '+fmt(c.height)+' cm';
     document.querySelector('[data-model="bar"] small').textContent='Corp '+fmt(b.width)+' × '+fmt(b.depth)+' × '+fmt(b.height)+' cm';
   }
   let selectedWorktop='cabinet',worktopModel=null;
   function syncWorktopControls() {
     $('worktopSettings').hidden=state.model==='photo';if(state.model==='photo')return;
-    if(worktopModel!==state.model) {
-      const keys=state.model==='custom'?['cabinet']:['bar','table'];
+    const sizeKey=activeSizeKey();
+    if(worktopModel!==sizeKey) {
+      const keys=activeWorktopKeys();
       if(!keys.includes(selectedWorktop))selectedWorktop=keys[0];
-      $('worktopSelect').innerHTML=keys.map(key=>'<option value="'+key+'">'+({cabinet:'Blatul dulapului',bar:'Blatul barului',table:'Blatul mesei extensibile'}[key])+'</option>').join('');
-      $('worktopSelect').value=selectedWorktop;worktopModel=state.model;
+      $('worktopSelect').innerHTML=keys.map(key=>'<option value="'+key+'">'+({cabinet:'Blatul dulapului',bar:'Blatul barului',table:'Blatul mesei extensibile',island:'Blatul insulei',islandTable:'Blatul mesei retractabile'}[key])+'</option>').join('');
+      $('worktopSelect').value=selectedWorktop;worktopModel=sizeKey;
     }
     const top=resolvedWorktop(selectedWorktop),base=baseWorktop(selectedWorktop);
     for(const field of Object.keys(WORKTOP_LIMITS)) {
       const input=$('worktop-'+field);input.min=WORKTOP_LIMITS[field].min;input.max=WORKTOP_LIMITS[field].max;
       if(document.activeElement!==input)input.value=top[field];
     }
-    $('worktop-note').textContent=selectedWorktop==='table'?'Blatul urmează extensia mesei; surplusul și deplasarea se păstrează. Pozițiile se citesc privind mobilierul din față.':'Dimensiunea se adaptează la corp, păstrând surplusul ales. Pozițiile se citesc privind mobilierul din față.';
-    const referenceDepth=selectedWorktop==='bar'?state.sizes.bar.depth:base.depth;
-    const excess={left:(top.width-base.width)/2-top.offsetX,right:(top.width-base.width)/2+top.offsetX,front:(top.depth-referenceDepth)/2+top.offsetZ,back:(top.depth-referenceDepth)/2-top.offsetZ};
+    const isTable=selectedWorktop==='table'||selectedWorktop==='islandTable';
+    $('worktop-note').textContent=selectedWorktop==='islandTable'?'Lățimea este partea vizibilă a blatului; restul se retrage în corp. Surplusul și deplasarea se păstrează. Pozițiile se citesc privind mobilierul din față.':isTable?'Blatul urmează extensia mesei; surplusul și deplasarea se păstrează. Pozițiile se citesc privind mobilierul din față.':'Dimensiunea se adaptează la corp, păstrând surplusul ales. Pozițiile se citesc privind mobilierul din față.';
+    const referenceDepth=selectedWorktop==='bar'?state.sizes.bar.depth:selectedWorktop==='island'?state.sizes.island.depth:base.depth;
+    const referenceWidth=selectedWorktop==='island'?state.sizes.island.width:base.width;
+    const excess={left:(top.width-referenceWidth)/2-top.offsetX,right:(top.width-referenceWidth)/2+top.offsetX,front:(top.depth-referenceDepth)/2+top.offsetZ,back:(top.depth-referenceDepth)/2-top.offsetZ};
     for(const [key,value]of Object.entries(excess))$('overhang-'+key).textContent=fmt(Math.round(value*10)/10)+' cm';
-    $('overhang-label').textContent=selectedWorktop==='table'?'Față de conturul standard al mesei':'Depășire față de corp';
+    $('overhang-label').textContent=isTable?'Față de conturul standard al mesei':'Depășire față de corp';
   }
-  function extensionLength(){return 30+state.extension*(state.sizes.bar.tableLength-30);}
+  function extensionLength(variant=state.barVariant){return variant==='island'?state.sizes.island.tableLength-state.sizes.island.tableRetraction*(1-state.extension):30+state.extension*(state.sizes.bar.tableLength-30);}
   function syncControls() {
     syncPhotoCard();
+    $('barVariantControl').hidden=state.model!=='bar';
+    document.querySelectorAll('[data-bar-variant]').forEach(button=>{const active=button.dataset.barVariant===state.barVariant;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active);});
+    $('barVariantNote').textContent=state.barVariant==='island'?'Insulă cu sertare, acces din spate și masă retractabilă pe două picioare. Dimensiunile fiecărei variante se păstrează separat.':'Bar înalt cu acces pe ambele fețe și masă cu rafturi la capăt. Dimensiunile fiecărei variante se păstrează separat.';
     document.querySelectorAll('[data-model]').forEach(button => { const active = button.dataset.model === state.model; button.classList.toggle('active', active); button.setAttribute('aria-pressed', active); });
     document.querySelectorAll('[data-palette]').forEach(button => { const active = button.dataset.palette === state.palette; button.classList.toggle('active', active); button.setAttribute('aria-pressed', active); });
     for (const role of MATERIAL_ROLES) {
@@ -411,8 +440,10 @@
     $('extensionControl').hidden = state.model !== 'bar';
     $('extension').value = Math.round(state.extension*100);
     $('extensionValue').textContent = fmt(extensionLength())+' cm';
+    $('extensionNote').hidden=state.barVariant!=='island';
+    $('extensionNote').textContent='Retracție în corp: '+fmt(state.sizes.island.tableRetraction*(1-state.extension))+' din '+fmt(state.sizes.island.tableRetraction)+' cm. Lungime vizibilă: '+fmt(extensionLength('island'))+' cm.';
     $('dimensionsBtn').setAttribute('aria-pressed', state.dimensions);
-    const info = MODELS[state.model];
+    const info = modelInfo();
     $('modelTitle').textContent = state.model==='photo'?state.photo.name:info.title; $('modelDescription').textContent = info.description;
     $('modelCategory').textContent = state.model==='photo'?'FOTOGRAFIA TA / MODEL APROXIMATIV':'COLECȚIA BUCĂTĂRIE / '+info.index;
     document.querySelector('.model-badge>span:last-child').textContent=state.model==='photo'?(state.photo.descriptor.version===2?'GENERAT CU AI · MODEL EDITABIL':'MODEL IMPORTAT DIN FOTOGRAFIE'):'MODEL 3D INTERACTIV';
@@ -442,16 +473,17 @@
     }
   }
   function updateSharePreview() {
-    $('share-model-value').textContent = MODELS[state.model].title;
+    $('share-model-value').textContent = modelInfo().title;
     $('share-size-value').textContent = fmt(metrics.width)+' × '+fmt(metrics.depth)+' × '+fmt(metrics.height)+' cm';
     const worktops = resolvedWorktops();
-    $('share-worktops-value').textContent = (state.model==='custom' ? [['cabinet','Dulap']] : [['bar','Bar'],['table','Masă']]).map(([key,label])=>{
+    $('share-worktops-value').textContent = (state.model==='custom' ? [['cabinet','Dulap']] : [['bar',state.barVariant==='island'?'Insulă':'Bar'],['table','Masă']]).map(([key,label])=>{
       const top=worktops[key];
       return label+': '+fmt(top.width)+' × '+fmt(top.depth)+' cm · X '+fmt(top.offsetX)+' / Z '+fmt(top.offsetZ)+' cm';
     }).join('\n');
     const details = ['Uși '+(state.doorsOpen?'deschise':'închise')];
     if(state.model==='custom')details.push('Fronturi '+(state.glass?'din sticlă':'pline'));
     if(state.model==='bar')details.push('Extensie '+fmt(extensionLength())+' cm');
+    if(state.model==='bar'&&state.barVariant==='island')details.push('Retracție max. '+fmt(state.sizes.island.tableRetraction)+' cm');
     details.push('Cote '+(state.dimensions?'afișate':'ascunse'));
     $('share-details-value').textContent = details.join(' · ');
     for (const role of MATERIAL_ROLES) {
@@ -475,7 +507,7 @@
   function rebuild(resetCamera = false) {
     const refit=pendingRefit;pendingRebuild=false;pendingRefit=false;
     // Rebuild off-scene first so the previous object survives a failed update.
-    const built = MODELS[state.model].builder({ ...state, size:state.sizes[state.model], worktops:resolvedWorktops(), hardware: '#4d5148', edgeDetails: true });
+    const built = MODELS[state.model].builder({ ...state, size:state.sizes[activeSizeKey()], worktops:resolvedWorktops(), hardware: '#4d5148', edgeDetails: true });
     dispose(model); model = built.group; model.name = state.model;
     metrics = { width: built.width, height: built.height, depth: built.depth };
     modelBounds=built.bounds||{minX:-built.width/2,maxX:built.width/2,minZ:-built.depth/2,maxZ:built.depth/2};
@@ -515,6 +547,7 @@
     if(event.key==='0'||event.key==='Home')fit(true); else {selectView(null);updateCamera();}
   });
   document.querySelector('.model-grid').addEventListener('click',event=>{const button=event.target.closest('[data-model]');if(!button||state.model===button.dataset.model)return;const next=button.dataset.model;if(!Object.hasOwn(MODELS,next)||(next==='photo'&&!state.photo))return;state.model=next;state.doorsOpen=false;rebuild(true);});
+  $('barVariantControl').addEventListener('click',event=>{const button=event.target.closest('[data-bar-variant]');if(!button||state.model!=='bar'||!['bar','island'].includes(button.dataset.barVariant)||state.barVariant===button.dataset.barVariant)return;state.barVariant=button.dataset.barVariant;state.doorsOpen=false;rebuild(true);});
   document.querySelectorAll('[data-palette]').forEach(button => button.addEventListener('click', () => { const key=button.dataset.palette; Object.assign(state, PRESETS[key], {palette:key}); syncControls(); scheduleRebuild(); }));
   for(const role of MATERIAL_ROLES) {
     $(role+'Color').addEventListener('input', event => {state[role]=event.target.value;state.palette=matchedPalette(state);syncControls();scheduleRebuild();});
@@ -528,12 +561,13 @@
   }
   function editSize(event) {
     const input=event.target,key=input.dataset.size;if(!key)return;
+    const sizeKey=activeSizeKey();
     if(input.value.trim()===''||!input.validity.valid||!Number.isFinite(input.valueAsNumber)) {
-      if(event.type==='change') {const limits=sizeLimit(state.model,key,state.sizes[state.model]);input.value=state.sizes[state.model][key];toast('Introdu o valoare între '+fmt(limits.min)+' și '+fmt(limits.max)+' cm.');}
+      if(event.type==='change') {const limits=sizeLimit(sizeKey,key,state.sizes[sizeKey]);input.value=state.sizes[sizeKey][key];toast('Introdu o valoare între '+fmt(limits.min)+' și '+fmt(limits.max)+' cm.');}
       return;
     }
-    state.sizes[state.model]=normalizeSize(state.model,{...state.sizes[state.model],[key]:input.valueAsNumber});
-    if(event.type==='change')input.value=state.sizes[state.model][key];
+    state.sizes[sizeKey]=normalizeSize(sizeKey,{...state.sizes[sizeKey],[key]:input.valueAsNumber});
+    if(event.type==='change')input.value=state.sizes[sizeKey][key];
     syncSizeControls();scheduleRebuild(true);
   }
   $('dimensionSettings').addEventListener('input',editSize);
@@ -552,8 +586,8 @@
   $('worktopSettings').addEventListener('input',editWorktop);$('worktopSettings').addEventListener('change',editWorktop);
   $('worktopSelect').addEventListener('change',event=>{selectedWorktop=event.target.value;syncWorktopControls();});
   $('centerWorktop').addEventListener('click',()=>{state.worktops[selectedWorktop].offsetX=0;state.worktops[selectedWorktop].offsetZ=0;pendingRefit=true;rebuild();});
-  $('resetWorktop').addEventListener('click',()=>{state.worktops[selectedWorktop]=defaultWorktop();pendingRefit=true;rebuild();toast('Blatul selectat a revenit la dimensiunea și poziția inițiale.');});
-  $('resetDimensions').addEventListener('click',()=>{state.sizes[state.model]=originalSize(state.model);resetModelWorktops();pendingRefit=true;rebuild();toast(state.model==='photo'?'Dimensiunile au revenit la valorile de la import.':'Dimensiunile modelului și blaturile au revenit la cele din schiță.');});
+  $('resetWorktop').addEventListener('click',()=>{state.worktops[selectedWorktop]=defaultWorktop(selectedWorktop);pendingRefit=true;rebuild();toast('Blatul selectat a revenit la dimensiunea și poziția inițiale.');});
+  $('resetDimensions').addEventListener('click',()=>{const key=activeSizeKey();state.sizes[key]=originalSize(key);resetModelWorktops();pendingRefit=true;rebuild();toast(state.model==='photo'?'Dimensiunile au revenit la valorile de la import.':'Dimensiunile modelului și blaturile au revenit la cele din schiță.');});
   $('extension').addEventListener('input', event => {state.extension=Number(event.target.value)/100; $('extensionValue').textContent=fmt(extensionLength())+' cm';scheduleRebuild();});
   $('extension').addEventListener('change', () => {if(pendingRebuild){pendingRebuild=false;rebuild();}fit(false);});
   for(const key of ['doorsOpen','glass'])$(key).addEventListener('change', event => {state[key]=event.target.checked;rebuild();if(key==='doorsOpen')fit(false);});
@@ -564,9 +598,9 @@
     theta=view==='back'?Math.PI:view==='side'?Math.PI/2:0;phi=Math.PI/2-.004;selectView(view);fit(false);
   }));
   $('zoomIn').addEventListener('click', () => zoom(.86)); $('zoomOut').addEventListener('click', () => zoom(1.16)); $('fitBtn').addEventListener('click', () => fit(true));
-  $('resetBtn').addEventListener('click', () => {const current=state.model,sizes=state.sizes,photo=state.photo,worktops=state.worktops;state=defaults();state.model=current;state.sizes=sizes;state.photo=photo;state.worktops=worktops;state.sizes[current]=originalSize(current);resetModelWorktops();rebuild(true);toast('Configurația modelului a fost resetată.');});
+  $('resetBtn').addEventListener('click', () => {const current=state.model,barVariant=state.barVariant,sizes=state.sizes,photo=state.photo,worktops=state.worktops;state=defaults();state.model=current;state.barVariant=barVariant;state.sizes=sizes;state.photo=photo;state.worktops=worktops;const key=activeSizeKey();state.sizes[key]=originalSize(key);resetModelWorktops();rebuild(true);toast('Configurația modelului a fost resetată.');});
   function download(blob,name) { const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000); }
-  $('saveBtn').addEventListener('click', () => {const project={format:'forma-furniture',version:5,savedAt:new Date().toISOString(),configuration:state};download(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),'forma-'+state.model+'.json');toast('Proiect salvat. Îl poți redeschide în acest configurator.');});
+  $('saveBtn').addEventListener('click', () => {if(pendingRebuild)rebuild();const project={format:'forma-furniture',version:6,savedAt:new Date().toISOString(),configuration:state};download(new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),'forma-'+activeSizeKey()+'.json');toast('Proiect salvat. Îl poți redeschide în acest configurator.');});
   $('shareAppearanceBtn').addEventListener('click', () => {
     if(state.model==='photo') {
       toast('Pentru a partaja mobilierul din fotografie, folosește „Salvează proiect” și trimite fișierul JSON.');
@@ -593,7 +627,7 @@
   $('importBtn').addEventListener('click', () => $('projectFile').click());
   $('projectFile').addEventListener('change', async event => {
     const file=event.target.files[0];if(!file)return;
-    try {if(file.size>500000)throw new Error('Fișierul este prea mare pentru un proiect.');const data=JSON.parse(await file.text());if(data.format!=='forma-furniture'||![1,2,3,4,5].includes(data.version))throw new Error('Alege un proiect JSON salvat din FORMĂ.');state=validate(data.configuration,data.version===5?'split':'auto');rebuild(true);toast('Proiectul a fost încărcat.');}
+    try {if(file.size>500000)throw new Error('Fișierul este prea mare pentru un proiect.');const data=JSON.parse(await file.text());if(data.format!=='forma-furniture'||![1,2,3,4,5,6].includes(data.version))throw new Error('Alege un proiect JSON salvat din FORMĂ.');state=validate(data.version<6?{...data.configuration,barVariant:'bar'}:data.configuration,data.version>=5?'split':'auto',data.version===6);rebuild(true);toast('Proiectul a fost încărcat.');}
     catch(error){toast(error.message||'Proiectul nu a putut fi încărcat.');}
     event.target.value='';
   });
@@ -606,11 +640,11 @@
     const source=renderer.domElement, canvas=document.createElement('canvas');canvas.width=source.width;canvas.height=source.height+140;
     const dark=window.FormaTheme.getTheme()==='dark';
     const ctx=canvas.getContext('2d');ctx.fillStyle=dark?'#151d18':'#f4f4ee';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(source,0,0);
-    ctx.fillStyle=dark?'#e4eadf':'#3f5137';ctx.font='30px Georgia';ctx.fillText('FORMĂ / '+MODELS[state.model].title,32,source.height+47);
+    ctx.fillStyle=dark?'#e4eadf':'#3f5137';ctx.font='30px Georgia';ctx.fillText('FORMĂ / '+modelInfo().title,32,source.height+47);
     ctx.font='17px Segoe UI';ctx.fillStyle=dark?'#a0ad9a':'#7d8973';ctx.fillText(fmt(metrics.width)+' × '+fmt(metrics.depth)+' × '+fmt(metrics.height)+' cm  ·  '+(state.palette?PRESETS[state.palette].name:'Paletă personalizată'),32,source.height+81);
     ctx.font='12px Segoe UI';ctx.fillText('Model orientativ. Blat '+state.top+' · Fronturi sus '+state.frontsUpper+' · Fronturi jos '+state.frontsLower+' · Corp '+state.body,32,source.height+110);
     renderer.setPixelRatio(previousRatio);renderer.setSize(previousSize.x,previousSize.y,false);dirty=true;
-    canvas.toBlob(blob=>{if(blob){download(blob,'forma-'+state.model+'.png');toast('Imaginea 3D a fost exportată.');}},'image/png');
+    canvas.toBlob(blob=>{if(blob){download(blob,'forma-'+activeSizeKey()+'.png');toast('Imaginea 3D a fost exportată.');}},'image/png');
   });
   $('fullscreenBtn').addEventListener('click', async () => {try{if(document.fullscreenElement)await document.exitFullscreen();else if($('stage').requestFullscreen)await $('stage').requestFullscreen();else toast('Ecranul complet nu este disponibil în acest browser.');}catch(_){toast('Ecranul complet nu este disponibil în acest browser.');}});
   $('trendsBtn').addEventListener('click', () => $('trendsDialog').showModal());

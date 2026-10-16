@@ -4,7 +4,8 @@ Configurator 3D de mobilier pentru explorarea culorilor, finisajelor și dimensi
 
 ## Funcționalități
 
-- Două modele parametrice: dulap vitrină și bar cu masă extensibilă.
+- Două familii de modele parametrice: dulap vitrină și bar/insulă cu masă extensibilă.
+- Varianta **Insulă & masă**: corp de 90 cm înălțime, sertare, acces prin spate și masă pe două picioare, retractabilă cu 70 cm în corp.
 - Trei palete presetate și culori independente pentru blat, fronturile de sus, fronturile de jos și carcasă.
 - Finisaje lemn, mat și piatră, alese separat pentru fiecare zonă.
 - Dimensiuni editabile pentru corpuri și compartimentare.
@@ -43,6 +44,10 @@ Comutatorul soare/lună din antet schimbă tema interfeței. Această preferinț
 
 Controalele **Fronturi / Uși — Sus** și **Fronturi / Uși — Jos** colorează separat ușile superioare și inferioare ale dulapului. La bar, zona de sus este sertarul, iar zona de jos cuprinde ușile, pe ambele fețe. La modelele AI, fronturile sunt grupate după înălțime. Alegerea unei palete presetate aplică aceeași culoare și același finisaj ambelor zone, care pot fi apoi modificate independent.
 
+În cardul **Bar / Insulă & masă**, selectorul permite trecerea între barul înalt și **Insulă & masă**. Dimensiunile și blaturile celor două variante se păstrează separat. Insula pornește de la un corp de 80 × 90 × 90 cm, blat de 82 × 92 cm (1 cm lateral și 2 cm în față) și masă de 110 × 90 cm la înălțimea de 76 cm. Masa glisează până la 70 cm în corp, lăsând 40 cm vizibili. Retracția se poate modifica din **Dimensiunile mesei** și se limitează la spațiul disponibil în corp. Lățimea editabilă a blatului mesei reprezintă partea vizibilă. Cotele generale includ depășirile blaturilor.
+
+Insula are două sertare sus, o ușă jos în stânga și încă două sertare în dreapta; în spate sunt două uși și trei rafturi cu puncte de reglaj. Culoarea fronturilor de sus se aplică rândului superior de sertare, iar cea de jos ușilor și sertarelor inferioare. Geometria interpretează schița: sertarele superioare sunt adaptate pentru a lăsa liber spațiul de glisare a mesei. Pentru cotele contradictorii ale blatului s-a folosit vederea laterală (corp adânc de 90 cm, blat de 92 cm, fără depășire în spate).
+
 ## Publicare
 
 ### Cloudflare Workers cu generare AI
@@ -80,8 +85,9 @@ Poți încărca numai `dist` pe orice serviciu static (inclusiv Netlify, folosin
 
 ```json
 {
-  "v": 2,
+  "v": 3,
   "model": "custom",
+  "barVariant": "bar",
   "top": "#c5a277",
   "topFinish": "wood",
   "frontsUpper": "#87927b",
@@ -98,12 +104,19 @@ Poți încărca numai `dist` pe orice serviciu static (inclusiv Netlify, folosin
     "bar": {
       "width": 80, "depth": 90, "height": 110,
       "tableLength": 110, "tableDepth": 90, "tableHeight": 76
+    },
+    "island": {
+      "width": 80, "depth": 90, "height": 90,
+      "tableLength": 110, "tableDepth": 90, "tableHeight": 76,
+      "tableRetraction": 70
     }
   },
   "worktops": {
     "cabinet": {"widthDelta": 0, "depthDelta": 0, "offsetX": 0, "offsetZ": 0},
     "bar": {"widthDelta": 0, "depthDelta": 0, "offsetX": 0, "offsetZ": 0},
-    "table": {"widthDelta": 0, "depthDelta": 0, "offsetX": 0, "offsetZ": 0}
+    "table": {"widthDelta": 0, "depthDelta": 0, "offsetX": 0, "offsetZ": 0},
+    "island": {"widthDelta": 0, "depthDelta": 0, "offsetX": 0, "offsetZ": 1},
+    "islandTable": {"widthDelta": 0, "depthDelta": 0, "offsetX": 0, "offsetZ": 0}
   },
   "extension": 1,
   "glass": true,
@@ -112,11 +125,11 @@ Poți încărca numai `dist` pe orice serviciu static (inclusiv Netlify, folosin
 }
 ```
 
-La deschidere, linkul restabilește modelul selectat (`custom` sau `bar`), dimensiunile ambelor modele, cele trei blaturi și opțiunile de afișare, împreună cu toate culorile și finisajele. Dimensiunile și deplasările sunt în centimetri. `widthDelta` și `depthDelta` reprezintă ajustările față de dimensiunea implicită a blatului, astfel încât depășirile se păstrează când corpul sau extensia mesei se modifică. `offsetX` mută blatul spre dreapta pentru valori pozitive, iar `offsetZ` spre față. `extension` este între `0` (retrasă) și `1` (extinsă).
+La deschidere, linkul restabilește modelul selectat (`custom` sau `bar`), varianta `barVariant` (`bar` sau `island`), dimensiunile, blaturile și opțiunile de afișare, împreună cu toate culorile și finisajele. Dimensiunile și deplasările sunt în centimetri. `widthDelta` și `depthDelta` reprezintă ajustările față de dimensiunea implicită a blatului, astfel încât depășirile se păstrează când corpul sau extensia mesei se modifică. `offsetX` mută blatul spre dreapta pentru valori pozitive, iar `offsetZ` spre față. `extension` este între `0` (retrasă) și `1` (extinsă). Insula are dimensiuni și blaturi proprii, în `sizes.island`, `worktops.island` și `worktops.islandTable`.
 
-Parametrii invalizi sunt respinși. După partajare, modificările configurației actualizează și adresa paginii. Formatul `config` v2 include opt câmpuri pentru culori și finisaje, cu `frontsUpper` / `frontsUpperFinish` și `frontsLower` / `frontsLowerFinish` independente. Linkurile vechi `config` v1 și cele cu parametrul `finisaje` rămân compatibile: culoarea și finisajul unice pentru fronturi se aplică ambelor zone. Linkurile `finisaje` păstrează modelul și dimensiunile destinatarului.
+Parametrii invalizi sunt respinși. După partajare, modificările configurației actualizează și adresa paginii. Formatul `config` v3 adaugă varianta insulă la cele opt câmpuri pentru culori și finisaje, cu `frontsUpper` / `frontsUpperFinish` și `frontsLower` / `frontsLowerFinish` independente. Linkurile vechi `config` v1/v2 sunt importate cu varianta bar. În v1, culoarea și finisajul unice pentru fronturi se aplică ambelor zone. Linkurile `finisaje` v1/v2 rămân compatibile și păstrează modelul, varianta și dimensiunile destinatarului.
 
-Proiectele JSON exportate folosesc versiunea 5 și păstrează separat culorile și finisajele celor două zone. Proiectele mai vechi sunt importate cu aceeași culoare și același finisaj pe fronturile de sus și de jos. Contractul AI rămâne la versiunea 2, cu `colors.fronts` unic; la generare, acea culoare inițializează ambele zone editabile.
+Proiectele JSON exportate folosesc versiunea 6 și păstrează varianta bar/insulă, dimensiunile și blaturile ambelor variante, precum și culorile și finisajele independente. Proiectele v1–v5 sunt importate cu varianta bar; cele cu o singură culoare de fronturi o aplică ambelor zone. Contractul AI rămâne la versiunea 2, cu `colors.fronts` unic; la generare, acea culoare inițializează ambele zone editabile.
 
 Partajarea prin link este disponibilă pentru cele două modele predefinite. Pentru un model generat din fotografie, folosește **Salvează proiectul** și importul fișierului JSON: acesta conține geometria, miniatura, culorile, finisajele și dimensiunile, fără credențiale AI. Destinatarul poate deschide și edita proiectul fără conectare la AI.
 

@@ -270,5 +270,148 @@
     return { group, width: overallWidth, height, depth: overallDepth, bounds };
   }
 
-  window.FurnitureIslands = { buildBar };
+  function buildIsland(options) {
+    const c = context(options), { o, mat, box, cylinder, knob, pegRows, shelfPegs } = c;
+    const defaults = { width: 80, height: 90, depth: 90, tableLength: 110, tableHeight: 76, tableDepth: 90, tableRetraction: 70 };
+    const limits = { width: [50, 160], height: [85, 120], depth: [50, 130], tableLength: [40, 180], tableHeight: [60, 100], tableDepth: [40, 130], tableRetraction: [0, 140] };
+    const size = Object.assign({}, defaults);
+    for (const key of Object.keys(defaults)) {
+      const raw = o.size && o.size[key], value = raw == null || raw === '' ? NaN : Number(raw);
+      if (Number.isFinite(value)) size[key] = Math.max(limits[key][0], Math.min(limits[key][1], value));
+    }
+    size.tableHeight = Math.min(size.tableHeight, size.height - 12);
+    size.tableDepth = Math.min(size.tableDepth, size.depth);
+    size.tableRetraction = Math.min(size.tableRetraction, size.width - 10, size.tableLength - 20);
+    const { width, height, depth, tableHeight, tableDepth } = size;
+    const retraction = size.tableRetraction * (1 - o.extension);
+    const extension = size.tableLength - retraction;
+    const worktops = {
+      bar: { width: width + 2, depth: depth + 2, offsetX: 0, offsetZ: 1 },
+      table: { width: extension, depth: tableDepth, offsetX: 0, offsetZ: 0 }
+    };
+    for (const role of Object.keys(worktops)) {
+      const requested = o.worktops && o.worktops[role];
+      for (const key of Object.keys(worktops[role])) {
+        const raw = requested && requested[key], value = raw == null || raw === '' ? NaN : Number(raw);
+        if (Number.isFinite(value) && (key.startsWith('offset') || value > 0)) worktops[role][key] = value;
+      }
+    }
+
+    const group = new T.Group(); group.name = 'Insulă cu masă retractabilă';
+    const cabinet = new T.Group(); cabinet.name = 'island-body'; cabinet.position.x = extension / 2; group.add(cabinet);
+    const left = -width / 2, right = width / 2, sideBottom = 7.4, sideTop = height - 3;
+    // The uninterrupted storage bay accommodates both the rigid tabletop and
+    // its sliding rails. Drawer boxes, dividers and shelves stop outside it.
+    const slotBottom = tableHeight - 6.2, slotTop = tableHeight + 0.6;
+    const lowerBottom = 7.8, lowerTop = slotBottom - 0.5, lowerHeight = lowerTop - lowerBottom;
+    const upperTop = sideTop - 0.4, upperBottom = Math.max(slotTop + 0.7, upperTop - 12.8);
+    const frontZ = depth / 2 + 0.9;
+    const columnWidth = width / 2 - 2.7, columnX = width / 4 - 0.95;
+    const halfStorageDepth = (depth - 7) / 2, halfStorageZ = (depth + 1) / 4;
+
+    const part = (name, parent, w, h, d, x, y, z, material = mat.body, outline = true) => {
+      const mesh = box(parent, w, h, d, x, y, z, material, outline); mesh.name = name; return mesh;
+    };
+    function flatDoor(name, doorWidth, doorHeight, hingeX, centerY, z, direction, face) {
+      const pivot = new T.Group(); pivot.name = name; pivot.position.set(hingeX, centerY, z); cabinet.add(pivot);
+      part(name + '-front', pivot, doorWidth, doorHeight, 1.8, direction * doorWidth / 2, 0, 0, mat.frontsLower);
+      knob(pivot, direction * (doorWidth - 4.5), doorHeight * 0.31, face * 1.05, face);
+      for (const y of [-doorHeight * 0.31, doorHeight * 0.31]) {
+        cylinder(pivot, 0.4, 3.6, 0, y, face * 0.45, mat.metal, 'y');
+        if (o.doorsOpen) part(name + '-hinge', pivot, 2.8, 1.8, 0.2, direction * 1.3, y, -face * 0.8, mat.metal, false);
+      }
+      if (o.doorsOpen) pivot.rotation.y = -direction * face * 1.65;
+      return pivot;
+    }
+    function flatDrawer(name, drawerWidth, drawerHeight, drawerDepth, x, y, role, faceExtraHeight = 0) {
+      const drawer = new T.Group(); drawer.name = name; drawer.position.set(x, y, frontZ); cabinet.add(drawer);
+      part(name + '-front', drawer, drawerWidth, drawerHeight + faceExtraHeight, 1.8, 0, faceExtraHeight / 2, 0, mat[role]);
+      knob(drawer, 0, faceExtraHeight / 2, 1.05);
+      const innerHeight = Math.max(2, drawerHeight - 2.4), centerZ = -drawerDepth / 2 - 1.4;
+      part(name + '-bottom', drawer, drawerWidth - 2.6, 0.8, drawerDepth, 0, -drawerHeight / 2 + 1.2, centerZ, mat.drawer, false);
+      for (const direction of [-1, 1]) part(name + '-side', drawer, 0.9, innerHeight, drawerDepth, direction * (drawerWidth / 2 - 1.3), 0, centerZ, mat.drawer, false);
+      part(name + '-back', drawer, drawerWidth - 2.6, innerHeight, 0.9, 0, 0, -drawerDepth - 1.4, mat.drawer, false);
+      return drawer;
+    }
+
+    part('island-plinth', cabinet, width - 4, 5.4, depth - 5, 0, 2.7, 0);
+    part('island-bottom', cabinet, width, 2, depth, 0, 6.4, 0);
+    part('island-left-side-lower', cabinet, 2, slotBottom - sideBottom, depth, left + 1, (slotBottom + sideBottom) / 2, 0);
+    part('island-left-side-upper', cabinet, 2, sideTop - slotTop, depth, left + 1, (sideTop + slotTop) / 2, 0);
+    const slotDepth = Math.min(depth, tableDepth + 1), edgeDepth = (depth - slotDepth) / 2;
+    if (edgeDepth > 0) for (const face of [-1, 1]) {
+      part('island-left-slot-edge', cabinet, 2, slotTop - slotBottom, edgeDepth, left + 1, (slotTop + slotBottom) / 2, face * (slotDepth + edgeDepth) / 2);
+    }
+    part('island-right-side', cabinet, 2, sideTop - sideBottom, depth, right - 1, (sideTop + sideBottom) / 2, 0);
+    part('island-upper-divider', cabinet, 1.6, sideTop - slotTop, depth - 4, 0, (sideTop + slotTop) / 2, 0);
+    part('island-storage-divider', cabinet, width - 4, lowerTop - sideBottom, 1.5, 0, (lowerTop + sideBottom) / 2, 0);
+    part('island-front-center-divider', cabinet, 1.6, lowerTop - sideBottom, halfStorageDepth, 0, (lowerTop + sideBottom) / 2, halfStorageZ);
+    part('island-rear-upper-panel', cabinet, width - 4, sideTop - slotTop, 1.8, 0, (sideTop + slotTop) / 2, -depth / 2 + 0.9);
+    if (upperBottom - slotTop > 1) part('island-front-upper-fascia', cabinet, width - 4, upperBottom - slotTop - 0.4, 1.8, 0, (upperBottom + slotTop - 0.4) / 2, depth / 2 - 0.9);
+    for (const y of [slotBottom + 0.1, slotTop - 0.1]) {
+      part('island-table-slot-lining', cabinet, 2, 0.2, slotDepth, left + 1, y, 0, mat.slot, false);
+    }
+
+    // Two small upper drawers and a door plus two lower drawers match the
+    // reference front. The rear doors expose three adjustable shelves.
+    const upperHeight = upperTop - upperBottom, upperY = (upperTop + upperBottom) / 2;
+    flatDrawer('island-front-upper-drawer-left', columnWidth, upperHeight, depth - 6.4, -columnX, upperY, 'frontsUpper');
+    flatDrawer('island-front-upper-drawer-right', columnWidth, upperHeight, depth - 6.4, columnX, upperY, 'frontsUpper');
+    // Closed faces sit outside the table's depth and conceal the sliding bay;
+    // the internal drawer boxes and dividers still stop below the rail path.
+    const frontDoorTop = upperBottom - 0.6, rearDoorTop = slotTop - 0.5;
+    flatDoor('island-front-door', columnWidth, frontDoorTop - lowerBottom, left + 2.1, (frontDoorTop + lowerBottom) / 2, frontZ, 1, 1);
+    const lowerDrawerHeight = (lowerHeight - 0.6) / 2;
+    for (let i = 0; i < 2; i++) {
+      flatDrawer('island-front-lower-drawer-' + (i + 1), columnWidth, lowerDrawerHeight, (depth - 8) / 2, columnX, lowerBottom + lowerDrawerHeight / 2 + i * (lowerDrawerHeight + 0.6), 'frontsLower', i === 1 ? frontDoorTop - lowerTop : 0);
+    }
+    flatDoor('island-rear-door-left', columnWidth, rearDoorTop - lowerBottom, left + 2.1, (rearDoorTop + lowerBottom) / 2, -frontZ, 1, -1);
+    flatDoor('island-rear-door-right', columnWidth, rearDoorTop - lowerBottom, right - 2.1, (rearDoorTop + lowerBottom) / 2, -frontZ, -1, -1);
+    const rearPegZ = [-depth / 2 + 9, -8];
+    for (let i = 1; i <= 3; i++) {
+      const y = sideBottom + (lowerTop - sideBottom) * i / 4;
+      part('island-rear-shelf-' + i, cabinet, width - 4.4, 1.8, halfStorageDepth, 0, y, -halfStorageZ);
+      shelfPegs(cabinet, left + 2.3, right - 2.3, rearPegZ, y);
+    }
+    pegRows(cabinet, left + 2.04, rearPegZ, 13, lowerTop - 5);
+    pegRows(cabinet, right - 2.04, rearPegZ, 13, lowerTop - 5);
+    for (let i = 1; i <= 2; i++) {
+      part('island-front-shelf-' + i, cabinet, width / 2 - 3.4, 1.8, halfStorageDepth, -(width / 4 + 0.5), sideBottom + (lowerTop - sideBottom) * i / 3, halfStorageZ);
+    }
+
+    const barTop = worktops.bar, tableTop = worktops.table;
+    part('island-countertop', cabinet, barTop.width, 3, barTop.depth, barTop.offsetX, height - 1.5, barTop.offsetZ, mat.top);
+    // The control describes the visible length. Retraction adds the hidden
+    // section back to the mesh, preserving one rigid slab as the table slides.
+    const outside = left - extension, tableCenterX = left - extension / 2 + retraction / 2;
+    const slabCenterX = left - tableTop.width / 2 + retraction / 2 + tableTop.offsetX;
+    const rigidTableLength = tableTop.width + retraction;
+    part('island-tabletop', cabinet, rigidTableLength, 3, tableTop.depth, slabCenterX, tableHeight - 1.5, tableTop.offsetZ, mat.top);
+    for (const face of [-1, 1]) {
+      part('island-table-leg-' + (face === 1 ? 'front' : 'back'), cabinet, 5, tableHeight - 3, 5, outside + 3.5, (tableHeight - 3) / 2, face * (tableDepth / 2 - 4));
+      part('island-table-guide-' + (face === 1 ? 'front' : 'back'), cabinet, size.tableLength - 7, 1.6, 1.3, tableCenterX + 2.5, tableHeight - 4.3, face * (tableDepth / 2 - 4), mat.metal, false);
+    }
+    part('island-table-apron', cabinet, 4, 6, tableDepth - 8, outside + 3.5, tableHeight - 6, 0);
+
+    const barWorldX = cabinet.position.x + barTop.offsetX;
+    const tableWorldX = cabinet.position.x + slabCenterX;
+    const bounds = {
+      minX: Math.min(-(width + extension) / 2, barWorldX - barTop.width / 2, tableWorldX - rigidTableLength / 2),
+      maxX: Math.max((width + extension) / 2, barWorldX + barTop.width / 2, tableWorldX + rigidTableLength / 2),
+      minZ: Math.min(-depth / 2, barTop.offsetZ - barTop.depth / 2, tableTop.offsetZ - tableTop.depth / 2),
+      maxZ: Math.max(depth / 2, barTop.offsetZ + barTop.depth / 2, tableTop.offsetZ + tableTop.depth / 2)
+    };
+    const overallWidth = bounds.maxX - bounds.minX, overallDepth = bounds.maxZ - bounds.minZ;
+    group.userData = {
+      model: 'bar', variant: 'island', extensionCm: extension, retractionCm: retraction,
+      tableLengthCm: rigidTableLength, tableHeight, tableDepth, sizeCm: size, worktops, bounds,
+      storageBayCm: { bottom: slotBottom, top: slotTop, depth: slotDepth, availableRetraction: width - 4 },
+      dimensionsCm: { width: overallWidth, height, depth: overallDepth },
+      bodyDimensionsCm: Object.assign({}, size),
+      overallDimensionsCm: { width: overallWidth, height, depth: overallDepth }
+    };
+    return { group, width: overallWidth, height, depth: overallDepth, bounds };
+  }
+
+  window.FurnitureIslands = { buildBar, buildIsland };
 })();

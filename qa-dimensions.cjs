@@ -7,6 +7,7 @@ const assert = require('node:assert/strict');
 const DEFAULT_SIZES = {
   custom: { width: 200, height: 215, depth: 50, counterHeight: 90, upperDepth: 30, nicheHeight: 47.5 },
   bar: { width: 80, height: 110, depth: 90, tableLength: 110, tableHeight: 76, tableDepth: 90 },
+  island: { width: 80, height: 90, depth: 90, tableLength: 110, tableHeight: 76, tableDepth: 90, tableRetraction: 70 },
   photo: {width:100,height:100,depth:50}
 };
 const CUSTOM = { width: 240, height: 230, depth: 60, counterHeight: 95, upperDepth: 35, nicheHeight: 50 };
@@ -151,11 +152,11 @@ const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(
     const savePromise = page.waitForEvent('download');
     await page.click('#saveBtn');
     const save = await savePromise;
-    const projectPath = path.join(qaDir, 'dimensions-project-v2.json');
+    const projectPath = path.join(qaDir, 'dimensions-project-v6.json');
     await save.saveAs(projectPath);
     const saved = JSON.parse(fs.readFileSync(projectPath, 'utf8'));
-    assert.equal(saved.version, 5);
-    assert.deepEqual(saved.configuration.sizes, { custom: CUSTOM, bar: BAR,photo:DEFAULT_SIZES.photo });
+    assert.equal(saved.version, 6);
+    assert.deepEqual(saved.configuration.sizes, { custom: CUSTOM, bar: BAR, island: DEFAULT_SIZES.island, photo: DEFAULT_SIZES.photo });
 
     await page.click('#resetDimensions');
     let reset = await state();
@@ -167,7 +168,7 @@ const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(
     await page.click('[data-palette="cashmere"]');
     await page.setInputFiles('#projectFile', projectPath);
     await page.waitForFunction(() => FormaConfigurator.getState().top === '#bb3355' && FormaConfigurator.getState().sizes.bar.width === 100);
-    assert.deepEqual((await state()).sizes, savedConfiguration.sizes, 'JSON v2 roundtrip preserves both objects');
+    assert.deepEqual((await state()).sizes, savedConfiguration.sizes, 'JSON v6 roundtrip preserves both objects');
     await page.reload();
     await page.waitForFunction(() => window.FormaConfigurator && document.querySelector('#loading').hidden);
     assert.deepEqual((await state()).sizes, savedConfiguration.sizes, 'Reload preserves both objects');
@@ -189,7 +190,7 @@ const closeTo = (actual, expected, label, tolerance = 0.025) => assert(Math.abs(
 
     // The delivered page is unchanged by this isolated browser context.
     assert.deepEqual(errors, []);
-    console.log(JSON.stringify({ passed: true, offline: true, editableDimensions: true, measured3DGeometry: true, independentModels: true, resetPreservesColors: true, invalidInputsSafe: true, jsonV2RoundTrip: true, legacyV1Import: true, persistence: true, mobileNoOverflow: true, pageErrors: errors }, null, 2));
+    console.log(JSON.stringify({ passed: true, offline: true, editableDimensions: true, measured3DGeometry: true, independentModels: true, resetPreservesColors: true, invalidInputsSafe: true, jsonV6RoundTrip: true, legacyV1Import: true, persistence: true, mobileNoOverflow: true, pageErrors: errors }, null, 2));
   } catch (error) {
     if (page) await page.screenshot({ path: path.join(qaDir, 'dimensions-failure.png'), fullPage: true }).catch(() => {});
     throw error;

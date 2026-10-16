@@ -11,8 +11,8 @@ const ROLES = ['top', 'frontsUpper', 'frontsLower', 'body'];
 const FIELDS = [...ROLES, ...ROLES.map(role => role + 'Finish')];
 const appearance = state => Object.fromEntries(FIELDS.map(key => [key, state[key]]));
 const shared = state => ({
-  v: 2, model: state.model, ...appearance(state),
-  sizes: { custom: state.sizes.custom, bar: state.sizes.bar }, worktops: state.worktops,
+  v: 3, model: state.model, barVariant: state.barVariant, ...appearance(state),
+  sizes: { custom: state.sizes.custom, bar: state.sizes.bar, island: state.sizes.island }, worktops: state.worktops,
   extension: state.extension, glass: state.glass, doorsOpen: state.doorsOpen, dimensions: state.dimensions
 });
 const remainder = state => Object.fromEntries(Object.entries(state).filter(([key]) => !FIELDS.includes(key) && !['palette', 'name'].includes(key)));
@@ -200,7 +200,7 @@ const upgradedAppearance = legacy => ({ top: legacy.top, frontsUpper: legacy.fro
     const validBefore = await state(page);
     const bad = mutate => { const value = clone(barExpected); mutate(value); return encode(value); };
     const invalid = [
-      ['unknown-version', bad(d => { d.v = 3; })],
+      ['unknown-version', bad(d => { d.v = 4; })],
       ['missing-upper-front', bad(d => { delete d.frontsUpper; })],
       ['missing-lower-front-finish', bad(d => { delete d.frontsLowerFinish; })],
       ['missing-model', bad(d => { delete d.model; })],
